@@ -1,0 +1,48 @@
++---------------------------------------------------------------------------
+|   PHP-IRC v2.2.1 Service Release
+|   ========================================================
+|   by Manick
+|   (c) 2001-2006 by http://www.phpbots.org/
+|   Contact: manick@manekian.com
+|   irc: #manekian@irc.rizon.net
+|   ========================================
+|   Special Contributions were made by:
+|   cortex
++---------------------------------------------------------------------------
+|   > Documentation
++---------------------------------------------------------------------------
+|   > This program is free software; you can redistribute it and/or
+|   > modify it under the terms of the GNU General Public License
+|   > as published by the Free Software Foundation; either version 2
+|   > of the License, or (at your option) any later version.
+|   >
+|   > This program is distributed in the hope that it will be useful,
+|   > but WITHOUT ANY WARRANTY; without even the implied warranty of
+|   > MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+|   > GNU General Public License for more details.
+|   >
+|   > You should have received a copy of the GNU General Public License
+|   > along with this program; if not, write to the Free Software
+|   > Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
++---------------------------------------------------------------------------
+|   Changes
+|   =======-------
+|   > If you wish to suggest or submit an update/change to the source
+|   > code, email me at manick@manekian.com with the change, and I
+|   > will look to adding it in as soon as I can.
++---------------------------------------------------------------------------
+
+- Added: New website: http://www.phpbots.org/
+- Added: "$this->getModule($modName)" for modules, so that they can access other modules directly
+- Added: Ability to spawn new bot from admin interface
+- Added: Ability to bind to IP when connecting to server
+- Added: Ability to connect to passworded servers
+- Added: 'raw' module option, where all messages of any type are passed to the module specified
+- Added: 'action' module option, to capture the '/me' tag.
+
+- Changed: Added news module and added "!news del high" and "!news del low" commands
+- Changed: Fixed bug in chat.php where "true" was mistyped as "ture" in handshaketimeout function
+- Changed: Fixed bug in irc::myStrToLower and irc::myStrToUpper
+- Changed: Fixed bug where 004 wasn't be interpreted correctly as 'connect' in function files
+- Changed: Fixed bug where bot trys to identify when asked to by nickserv and password field commented out in config file.
+- Changed: Fixed Major bug where onRead() was being done before onAccept() was called on a new created listen socket.

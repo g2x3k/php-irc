@@ -1,0 +1,870 @@
++---------------------------------------------------------------------------
+|   PHP-IRC v2.2.1 Service Release
+|   ========================================================
+|   by Manick
+|   (c) 2001-2006 by http://www.phpbots.org/
+|   Contact: manick@manekian.net
+|   irc: #manekian@irc.rizon.net
+|   ========================================================
++---------------------------------------------------------------------------
+|   > Module Command Reference
++---------------------------------------------------------------------------
+|   > This program is free software; you can redistribute it and/or
+|   > modify it under the terms of the GNU General Public License
+|   > as published by the Free Software Foundation; either version 2
+|   > of the License, or (at your option) any later version.
+|   >
+|   > This program is distributed in the hope that it will be useful,
+|   > but WITHOUT ANY WARRANTY; without even the implied warranty of
+|   > MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+|   > GNU General Public License for more details.
+|   >
+|   > You should have received a copy of the GNU General Public License
+|   > along with this program; if not, write to the Free Software
+|   > Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
++---------------------------------------------------------------------------
+|   Changes
+|   =======-------
+|   > If you wish to suggest or submit an update/change to the source
+|   > code, email me at manick@manekian.com with the change, and I
+|   > will look to adding it in as soon as I can.
++---------------------------------------------------------------------------
+
+The following file is a quickly put together command reference of all the functions that you can use to complement the php scripting language while writing your modules.
+
+===============
+Quick Reference (See below the quick reference for function descriptions)
+===============
+
+irc.php (Accessed with $this->ircClass->)
+-----------------------------------------
+array	parseModes($modeString)
+array	getMaintainedChannels()
+string	getClientConf($var = "")
+string 	getNick()
+string	getServerConf($var)
+string	getStatusString($status)
+string	getClientIP($long = 1)
+class	getChannelData($channel)
+class	getUserData($user, $channel = "")
+void	disconnect()
+void	setClientConfigVar($var, $value)
+void	joinChannel($chan)
+void	sendRaw($text, $force = false)
+void	privMsg($who, $msg, $queue = 1)
+void	action($who, $msg, $queue = 1)
+void	notice($who, $msg, $queue = 1)
+void	log($text)
+void	maintainChannel($channel, $key = "")
+void	removeMaintain($channel)
+void	addQuery($host, $port, $query, $line, $class, $function)
+int	getStatusRaw()
+bool	changeMode($chan, $act, $mode, $user)
+bool	isOnline($nick, $chan)
+bool	isMode($nick, $channel, $mode)
+bool	isChanMode($channel, $mode, $extra = "")
+bool	hasModeSet($chan, $user, $modes);
+bool	hostMasksMatch($mask1, $mask2)
+bool	checkIgnore($mask)
+
+socket.php (Accessed with $this->socketClass->)
+-----------------------------------------------
+string	getHost($sockInt)
+string	getQueue($sockInt)
+string	getQueueLine($sockInt)
+int	sendSocket($sockInt, $data)
+int	getSockStatus($sockInt)
+object	getSockData($sockInt)
+bool	hasWriteQueue($sockInt)
+bool	hasLine($sockInt)
+
+timers.php (Accessed with $this->timerClass->)
+----------------------------------------------
+class	addTimer($name, $class, $function, $args, $interval, $runRightAway = false)
+class	getTimers()
+void	removeTimer($timer) (MUST be name)
+
+mysql/postgre.php (Accessed with $this->db->)
+---------------------------------------------
+array	queryFetch($query)
+array	fetchArray($object)
+array	fetchRow($object)
+string	getError()
+bool	isConnected()
+int	lastID()
+int	numRows($toFetch)
+int	numQueries()
+void	close()
+object	query($query)
+
+dcc.php (Accessed with $this->dccClass->)
+-----------------------------------------
+array	getDccList()
+int	getDownloadCount()
+int	getUploadCount()
+int	getChatCount()
+int	getBytesDown()
+int	getBytesUp()
+int	addChat($nick, $host, $port, $admin, $handler)
+int	addFile($nick, $host, $port, $type, $filename, $size)
+int	sendFile($nick, $file)
+class	getDcc($dcc)
+void	dccInform($text, $from = null)
+
+chat.php
+----------
+void	disconnect($msg = "")
+void	dccSend($msg)
+
+file.php
+----------
+void	disconnect($msg = "")
+
+ini.php
+----------
+bool	getError()
+bool	sectionExists($section)
+bool	deleteSection($section)
+bool	deleteVar($section, $var)
+bool	setIniVal($section, $var, $val)
+bool	writeIni()
+array	getSections()
+array	getVars($section)
+array	getSection($section)
+array	randomSection($num = 1)
+array	searchSections($search, $type = EXACT_MATCH)
+array	searchVars($section, $search, $type = EXACT_MATCH)
+array	searchSectionsByVar($var, $search, $type = EXACT_MATCH)
+array	searchVals($section, $search, $type = EXACT_MATCH)
+mixed	randomVar($section, $num = 1)
+mixed	getIniVal($section, $var)
+int	numSections()
+int	numVars($section)
+
+Useful Static Routines
+-----------------------
+string	socket::generatePostQuery($query, $host, $path, $httpVersion)
+string	socket::generateGetQuery($query, $host, $path, $httpVersion)
+string	irc::intToSizeString($size)
+string	irc::myStrToLower($text)
+string	irc::myStrToUpper($text)
+string	irc::timeFormat($time, $format) 
+string	irc::randomHash()
+array	irc::multiLine($text)
+
+
+=========================
+Full Function Definitions
+=========================
+
+irc.php (Accessed with $this->ircClass->)
+-----------------------------------------
+
+-------------------------------
+array	parseModes($modeString)
+-------------------------------
+
+Mode strings usually come from the $line['params'] variable.  However, they look like this:
+
++o-b Manick blah!*@*
+
+This is a real mess to parse.  Thus, this function takes the line and returns an array of each mode being operated.  The format is as follows:
+
+$modesArray = array(
+
+  [0] = array( 'ACTION' => '+', 
+               'MODE' => 'o',
+               'EXTRA' => 'Manick',
+               'TYPE' => USER_MODE,
+             )
+
+  [1] = array( 'ACTION' => '-', 
+               'MODE' => 'b',
+               'EXTRA' => 'blah!*@*',
+               'TYPE' => CHANNEL_MODE,
+             )
+)
+
+
+--------------------------------
+array	getMaintainedChannels()
+--------------------------------
+This will return an array of all the channels that php-irc will attempt to stay in.  Every sixty seconds or so, the bot will attempt to join these channels if it is not currently in them.  See 'maintainChannel()' and 'removeMaintain()' for more information.
+
+
+--------------------------------
+string	getClientConf($var = "") 
+--------------------------------
+
+Will return the corresponding value for the setting of $var in bot.conf.  If $var == "", the full configuration array is returned as an array.  Also, if the setting does not exist in the configuration, this function will return an empty string, "".
+
+
+--------------------------------
+string 	getNick()
+--------------------------------
+
+Returns the bots current, IRC recognized nick.
+
+
+--------------------------------
+string	getServerConf($var)
+--------------------------------
+
+When connecting to a server, it will send these lines upon connection:
+NETWORK=Rizon STATUSMSG=@%+ MODES=4 CHANLIMIT=#:30 MAXCHANNELS=30 MAXLIST=beI:100 MAXBANS=100 MAXTARGETS=4 NICKLEN=30 TOPICLEN=400 KICKLEN=400 CHANNELLEN=50 AWAYLEN=90 are supported by this server
+CHANTYPES=# KNOCK EXCEPTS INVEX PREFIX=(ohv)@%+ CHANMODES=eIb,k,l,cimnpstMNORZ CASEMAPPING=rfc1459 CALLERID WALLCHOPS FNC PENALTY ETRACE are supported by this server
+
+(These are just samples).  So, you can retrieve the value for say, CHANMODES by doing this:
+
+getServerConf("CHANMODES");
+
+This will return a string, "eIb,k,l,cimnpstMNORZ".
+
+
+----------------------------------
+string	getStatusString($status)
+----------------------------------
+
+After using getStatusRaw(), you can feed its value to this function, and it'll send back what it means, like "Connecting to Server..."
+
+
+----------------------------------
+string	getClientIP($long = 1)
+----------------------------------
+
+This function returns the IP that the bot is using.  if you specify $long as 1, then the ip address converted to long integer form is returned.
+
+
+----------------------------------
+class	getChannelData($channel)
+----------------------------------
+
+This will search the channel database for the channel $channel, and then if it finds it, it will return that channels object.  See the "channelLink" class in defines.php for member information.
+
+
+----------------------------------
+class	getUserData($user, $channel = "")
+----------------------------------
+
+If a channel is specified, this will search the channel for the specified user's data.  If it is found, it will return it as an object.  See the "memberLink" class in defines.php for member information.  If no channel is specified, this will search the entire channel database until the member is found, and then return that object.
+
+
+----------------------------------
+void	disconnect()
+----------------------------------
+
+Disconnect the bot from the server...
+
+
+----------------------------------
+void	setClientConfigVar($var, $value)
+----------------------------------
+
+This will overwrite a configuration setting from bot.conf that the bot is currently using.  Self-explanitory.
+
+
+----------------------------------
+void	joinChannel($chan)
+----------------------------------
+
+Join the channel $chan
+
+
+----------------------------------
+void	sendRaw($text, $force = false)
+----------------------------------
+
+Send the raw text $text to the server.  If $force is true, then the data is sent RIGHT away, it totally bypasses the queue, everything.  It goes right to the send function, even through the socket class.  Use this if you need lightning fast responses, such as writing a channel guard script.
+
+
+----------------------------------
+void	privMsg($who, $msg, $queue = 1)
+----------------------------------
+
+$who = nick of user/name of channel
+
+Send text to a channel or user.  If $queue is 1, then the data will be put at the end of the text queue, if it is 0, it'll be pushed onto the beginning of the queue.
+
+----------------------------------
+void	action($who, $msg, $queue = 1)
+----------------------------------
+
+Same as privMsg... emulates the /me command from mIRC
+
+
+----------------------------------
+void	notice($who, $msg, $queue = 1)
+----------------------------------
+
+Same as privMsg, except a notice.
+
+
+----------------------------------
+void	log($text)
+----------------------------------
+
+Write something to the log file.
+
+----------------------------------
+void	maintainChannel($channel, $key = "")
+----------------------------------
+
+Attempt to stay in channel $channel.  The bot will attempt rejoining every 60 seconds.  You may specify a $key or leave it blank.
+
+----------------------------------
+void	removeMaintain($channel)
+----------------------------------
+
+No longer attempt to say in channel $channel.
+
+----------------------------------
+void	addQuery($host, $port, $query, $line, $class, $function)
+----------------------------------
+
+Also make sure you read the text about this function in the readme.txt, "Querying remote servers".  This function takes 6 arguments.
+
+$host = the host machine you want to connect to
+$port = the port you want to connect to
+$query = the raw data that will be sent to the server upon connection
+$line = the $line argument that was passed to your module's function (just pass this right along with addQuery)
+$class = usually '$this'..
+$function = the function to run after the query is complete.
+
+See sections 8 and 9 of readme.txt for information related to writing 'query' function types.
+
+
+----------------------------------
+int	getStatusRaw()
+----------------------------------
+
+Returns an integer corresponding to current server status.  See defines.php for meanings
+
+
+----------------------------------
+bool	changeMode($chan, $act, $mode, $user)
+----------------------------------
+
+Changes the mode of $user on $chan
+
+$act = either "+" or "-"
+$mode = some mode, like "o" (ops), or "b" (ban), or something else.
+$user = whatever the mode is being applied to
+
+
+----------------------------------
+bool	isOnline($nick, $chan)
+----------------------------------
+
+Send back whether the nick is on the channel $chan (true or false)
+
+
+----------------------------------
+bool	isMode($nick, $channel, $mode)
+----------------------------------
+
+See if some $user has some $mode activated on him in $channel
+
+$user = nick of user
+$mode = any mode, such as "o", "h", "v"
+
+
+----------------------------------
+bool	isChanMode($channel, $mode, $extra = "")
+----------------------------------
+
+Sends back whether a specific mode is set in a channel
+
+$mode = "b" or "s" or any other chan mode
+
+$extra = (if you're using "b" for $mode, specify mask here)
+
+
+----------------------------------
+bool	hasModeSet($chan, $nick, $modes)
+----------------------------------
+
+If any of the modes specified in "$modes" are set on a user in a channel, this will return true.
+For instance:
+
+If Manick is +vo in channel #manekian,
+
+hasModeSet("#manekian", "Manick", "oh")
+
+will return true.  I'm asking php-irc if Manick is either mode o or mode h.  Which he's mode o, so it returns true.
+
+
+----------------------------------
+bool	hostMasksMatch($mask1, $mask2)
+----------------------------------
+
+Use this to determine whether two host masks match
+
+
+----------------------------------
+bool	checkIgnore($mask)
+----------------------------------
+Check whether a hostmask is on the bot.conf ignore list.
+
+
+socket.php (Accessed with $this->socketClass->)
+-----------------------------------------------
+
+----------------------------------
+string	getHost($sockInt)
+----------------------------------
+Return the IP address of the current socket integer of a connection.  You can use connection::getSockInt() to get the sock int.
+
+
+----------------------------------
+string	getQueue($sockInt)
+----------------------------------
+Retrieve the current read queue for a socket.  The queue is then purged.
+
+
+----------------------------------
+string	getQueueLine($sockInt)
+----------------------------------
+Get the next line in the queue, purging it from the read buffer and returning it (without crlf)
+
+
+----------------------------------
+int	sendSocket($sockInt, $data)
+----------------------------------
+Send data to a socket
+
+
+----------------------------------
+int	getSockStatus($sockInt)
+----------------------------------
+Get the status of a socket.  See defines.php for list of constants.
+
+
+----------------------------------
+object	getSockData($sockInt)
+----------------------------------
+Return the object that retains all data about socket "$sockInt".  This is a php-irc maintained list.
+
+
+----------------------------------
+bool	hasWriteQueue($sockInt)
+----------------------------------
+Return true or false depending on whether the bot has data to write to the socket.  If this is true, you should restrain yourself from sending more data to the socket.  An onWrite() call will be sent every time data is written, and each time "hasWriteQueue()" should be called to see if the queue is empty before sending data.
+
+
+----------------------------------
+bool	hasLine($sockInt)
+----------------------------------
+Return true or false depending on if there is a newline in the buffer.
+
+
+timers.php (Accessed with $this->timerClass->)
+----------------------------------------------
+
+----------------------------------
+class	addTimer($name, $class, $function, $args, $interval, $runRightAway = false)
+----------------------------------
+
+Add a timer.  Please view the readme.txt documentation on this.
+
+----------------------------------
+class	getTimers()
+----------------------------------
+
+This function will return a pointer to all the active timers.  See the class "timer" in defines.php for member information.
+
+
+----------------------------------
+void	removeTimer($timer) (MUST be timer name)
+----------------------------------
+
+Remove a timer $timer <-- can only be the name of timer, unlike in 2.1.1 where it could be the object itself.
+
+
+mysql/postgre.php (Accessed with $this->db->)
+---------------------------------------------
+Some items for postgre aren't fully implemented or work yet... most notably queryFetch(), and some others.  See postgre.php for more details.
+
+----------------------------------
+array	queryFetch($query)
+----------------------------------
+
+Runs a query and returns the first row.  Basically does query() and then mysql_fetch_array()
+
+
+----------------------------------
+array	fetchArray($object)
+----------------------------------
+
+Does mysql_fetch_array() (see php.net for help)
+
+
+----------------------------------
+array	fetchRow($object)
+----------------------------------
+
+Does mysql_fetch_row()
+
+
+----------------------------------
+string	getError()
+----------------------------------
+
+Does mysql_error();
+
+
+----------------------------------
+bool	isConnected()
+----------------------------------
+
+Returns whether the database is connected
+
+----------------------------------
+int	lastID()
+----------------------------------
+
+Gets the last inserted 'id' row from the database.
+
+
+----------------------------------
+int	numRows($toFetch)
+----------------------------------
+
+Does mysql_num_rows()
+
+
+----------------------------------
+int	numQueries()
+----------------------------------
+
+sends back an integer of all the queries since the database class was spawned.
+
+
+----------------------------------
+void	close()
+----------------------------------
+
+Closes the database connection
+
+
+----------------------------------
+object	query($query)
+----------------------------------
+
+Runs a query, and returns the result as an object.
+
+
+dcc.php (Accessed with $this->dccClass->)
+-----------------------------------------
+
+----------------------------------
+array	getDccList()
+----------------------------------
+
+Returns an array of all current dcc's in progress (chat and file)
+
+
+----------------------------------
+int	getDownloadCount()
+----------------------------------
+
+Number of all current downloads
+
+
+----------------------------------
+int	getUploadCount()
+----------------------------------
+
+Number of all current uploads
+
+
+----------------------------------
+int	getChatCount()
+----------------------------------
+
+Number of all current dcc chat sessions
+
+
+----------------------------------
+int	getBytesDown()
+----------------------------------
+
+Returns number of bytes downloaded since bot was started
+
+
+----------------------------------
+int	getBytesUp()
+----------------------------------
+
+Returns number of bytes uploaded since bot was started
+
+
+----------------------------------
+int	addChat($nick, $host, $port, $admin, $handler)
+----------------------------------
+
+Use this to create a dcc chat session.
+
+$nick = nick of user to chat with
+$host = host of user to chat with
+$port = port to connect to
+$admin = whether the user is admin (use admin dcc chat administration)
+$handler = null, usually, unless you are creating a custom dcc chat handler.  See readme.txt for more information.
+
+If $host or $port is null, then addChat will think you are setting up a listening connection, otherwise it will try to connect to the host/port specified.
+
+
+----------------------------------
+int	addFile($nick, $host, $port, $type, $filename, $size)
+----------------------------------
+
+Send a file to someone, or recieve a file.
+
+$nick = nick of person sending/receiving file
+$host = host of person sending/receiving file
+$port = port of transfer
+$type = either UPLOAD or DOWNLOAD
+$filename = full filename with full path to file
+$size = size of the file, can be null if its an UPLOAD type.
+
+See readme.txt for more information regarding file transfers.
+
+
+----------------------------------
+int	sendFile($nick, $file)
+----------------------------------
+Alias for addFile($nick, null, null, UPLOAD, $file, null)... basically just an easier way of sending files.
+
+
+----------------------------------
+class	getDcc($dcc)
+----------------------------------
+
+$dcc = sockInt of the transfer
+
+Returns dcc object for some sockInt, see fileserver.php for example.
+
+
+----------------------------------
+void	dccInform($text)
+----------------------------------
+
+Send a message to all administrators
+
+
+chat.php
+----------
+
+----------------------------------
+void	disconnect($msg = "")
+----------------------------------
+
+End the chat session
+
+----------------------------------
+void	dccSend($msg)
+----------------------------------
+
+Send text to the user
+
+
+file.php
+----------
+
+----------------------------------
+void	disconnect($msg = "")
+----------------------------------
+
+End the dcc file transfer session
+
+
+ini.php
+----------
+Please see readme.txt for more information on create ini objects.
+
+
+----------------------------------
+bool	getError()
+----------------------------------
+An ini object will not operate after a fatal error.  You can use this to retrieve whether a fatal error has happened.
+
+
+----------------------------------
+bool	sectionExists($section)
+----------------------------------
+Return true if the section exists, or false if it doesn't.
+
+
+----------------------------------
+bool	deleteSection($section)
+----------------------------------
+Delete a section.
+
+
+----------------------------------
+bool	deleteVar($section, $var)
+----------------------------------
+Delete a var in a section.
+
+
+----------------------------------
+bool	setIniVal($section, $var, $val)
+----------------------------------
+Set the '$var' value '$val' in section $section.
+
+
+----------------------------------
+bool	writeIni()
+----------------------------------
+Write all of the ini changes to a file
+
+
+----------------------------------
+array	getSections()
+----------------------------------
+Return an array of all the section names.
+
+
+----------------------------------
+array	getVars($section)
+----------------------------------
+Return all the vars/vals in an associative array for $section.
+
+
+----------------------------------
+array	getSection($section)
+----------------------------------
+Alias for getVars()
+
+
+----------------------------------
+array	randomSection($num = 1)
+----------------------------------
+Does same as getVars(), but returns random section.  $num is the number of random sections to return.  Default 1.
+
+
+----------------------------------
+array	searchSections($search, $type = EXACT_MATCH)
+----------------------------------
+Search section names for $search, can do 4 types of searches: Exact, and, or, contains:
+
+Exact:  the section and search match completely
+And: the section name contains all componants of search (separated by space)
+Or: the section name contains at least one of the componants of search (separated by space)
+Contains: the section contains the search string within it
+
+
+----------------------------------
+array	searchVars($section, $search, $type = EXACT_MATCH)
+----------------------------------
+Search the variable names of a section for $search, same as searchSections() except with vars.
+
+
+----------------------------------
+array	searchSectionsByVar($var, $search, $type = EXACT_MATCH)
+----------------------------------
+In every section that has '$var' as a varaible, see if the var's value matches $search.
+
+
+----------------------------------
+array	searchVals($section, $search, $type = EXACT_MATCH)
+----------------------------------
+Search all the values of a section for '$search'.  Return list of vars.
+
+
+----------------------------------
+mixed	randomVar($section, $num = 1)
+----------------------------------
+Return a random var in a section.
+
+
+----------------------------------
+mixed	getIniVal($section, $var)
+----------------------------------
+Retrieve an ini value '$var' in section '$section'.  False if non-existant.
+
+
+----------------------------------
+int	numSections()
+----------------------------------
+Return number of sections.
+
+
+----------------------------------
+int	numVars($section)
+----------------------------------
+Return number of vars in a section.
+
+
+Useful Static Routines
+-----------------------
+
+----------------------------------
+string	socket::generatePostQuery($query, $host, $path, $httpVersion = "")
+----------------------------------
+
+Takes a query, like so:
+
+$query = "search=blah&somesetting=5";
+
+And turns it into a POST query you can send off to addQuery
+
+$host = host of server you will be accessing, like "www.manekian.com"
+$path = script + path of script you will be accessing, like "/search.php" or "/index.php", or just "/"
+$httpVersion, you can ignore this, but sometimes you might want to set this to "1.0"
+
+
+----------------------------------
+string	socket::generateGetQuery($query, $host, $path, $httpVersion)
+----------------------------------
+
+Same as generatePostQuery except with Get String
+
+
+----------------------------------
+string	irc::intToSizeString($size)
+----------------------------------
+
+Takes a large size, and then changes it into MB, GB, KB, depending on the size.
+
+
+----------------------------------
+string	irc::myStrToLower($text)
+----------------------------------
+
+RFC1459 complient strtolower()
+
+
+----------------------------------
+string	irc::myStrToUpper($text)
+----------------------------------
+
+RFC1459 complient strtoupper()
+
+
+----------------------------------
+string	irc::timeFormat($time, $format) 
+----------------------------------
+Feed this thing a timestring, and a format, and it'll send back a user friendly representation of the timestamp.
+
+for example:
+
+timeFormat(5, "%d days, %h hours, %m minutes, %s seconds")
+
+This will return a string, "0 days, 0 hours, 0 minutes, 5 seconds".
+
+
+----------------------------------
+string	irc::randomHash()
+----------------------------------
+
+Generates a 32 char random md5 hash
+
+
+----------------------------------
+array	irc::multiLine($text)
+----------------------------------
+
+Feed this a huge text string, and it will split it up into 255 max char increment lines you can send to the irc server.  It returns an array of all of these.
+
+
+

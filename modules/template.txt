@@ -1,0 +1,39 @@
+<?php
+/*
+
+Change:
+
+'class_name' to the name of your module (specified in function.conf)
+
+Add:
+
+Your functions after "//Methods here:"
+
+Add:
+
+Timer declarations and other general startup stuff to be run when the bot starts up in the init() function
+
+*/
+
+class class_name extends module {
+
+	public $title = "<title>";
+	public $author = "<author>";
+	public $version = "<version>";
+
+	public function init()
+	{
+		// Add your timer declarations and whatever
+		// else here...
+	}
+
+	public function destroy()
+	{
+		// Put code here to destroy the timers that you created in init()
+		// and whatever else cleanup code you want.
+	}
+
+	//Methods here:
+}
+
+?>

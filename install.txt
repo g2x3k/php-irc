@@ -1,0 +1,3 @@
+Please read readme.txt Section 3 for installation instructions.
+
+For QUICK INSTALL, please read Section 3-a of installation instructions.  You MUST set a variable in defines.php for this bot to work.

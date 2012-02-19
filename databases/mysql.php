@@ -76,24 +76,24 @@ class mysql {
   }
 
   public function reconnect()
-	{
-		$db = mysql_connect($this->host . ":" . $this->port, $this->user, $this->pass, true);
+  {
+    $db = mysql_connect($this->host . ":" . $this->port, $this->user, $this->pass, true);
 
-		if ($db === false)
-		{
-			return;
-		}
+    if ($db === false)
+    {
+      return;
+    }
 
-		$dBase = mysql_select_db($this->database, $db);
+    $dBase = mysql_select_db($this->database, $db);
 
-		if ($dBase === false)
-		{
-			return;
-		}
+    if ($dBase === false)
+    {
+      return;
+    }
 
-		$this->dbIndex = $db;
-		$this->isConnected = true;
-	}
+    $this->dbIndex = $db;
+    $this->isConnected = true;
+  }
 
   public function getError()
   {

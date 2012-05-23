@@ -1,10 +1,25 @@
-Running php-irc consists of 6 general steps (EXPERTS ONLY!):
+Linux beginner steps:
+apt-get install php5 php5-cli mysql-server
+git clone git://github.com/g2x3k/php-irc.git
 
-1) Download and unpack, compile the php 5 5.0.2+ package with sockets and pcntl.
-2) Edit the php.ini file following the steps in section 3-b (bottom half of section under "First, locate this line in the file:")
-3) Unzip php irc
-4) If the bot does not start up and connect to the server, you may have to set the OS parameter in the defines.php file.  Read the previous section.
-5) Change server/port information in bot.conf.  You can run php-irc with the -c switch to get an md5 password hash to set dccadminpass with.
-6) run php-irc with: /path/to/php/php.exe bot.php bot.conf from the php-irc directory, or edit the shebang line and change it to reflect your php location, (also use -c switch to specify php.ini location), and then chmod the bot.php file 755, and run with ./bot.php bot.conf
+enter the php-irc die
+now just have to edit the bot.conf file 
+to start the bot type: php -f bot.php bot.conf
 
-Of course, I recommend that you read the rest of this file, as it provides some very important information.
+
+Windows Beginner:
+Download php setup off php.net and install remeber to select php5-cli and sockets and pcntl under extentions
+theres multiple tools for using github on windows the easiest is the app located at http://windows.github.com/
+install and you will get a "Clone in Windows" button on https://github.com/g2x3k/php-irc
+in the github app you can click open containing folder... so much for the guide on how to use github lets get on with the bot
+i have put a start.cmd in the folder as of this update edit that to use the correct .conf
+
+
+tips: you can rename bot.conf to etc freenode.conf
+tips: to launch in background use nohup like: nohup php -f bot.php some.conf >> /dev/null &
+tips: You can run php-irc with the -c switch to get an md5 password hash to set dccadminpass with.
+
+
+Edit the php.ini file following the steps in section 3-b
+and Of course, I recommend that you read the rest of the README file,
+as it provides some very important information.

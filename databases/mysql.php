@@ -126,14 +126,14 @@ class mysql {
     // reconnect if no connection
     if (mysql_errno() == 2006) {
       $this->reconnect();
-      $data = mysql_query($query, $this->dbIndex);
+      $data = mysql_query($query  , $this->dbIndex);
     }
 
     if (!$data)
     {
       return false;
     }
-
+    else
     return $data;
   }
 

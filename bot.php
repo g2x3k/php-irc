@@ -56,6 +56,8 @@ require('./error.php');
 require('./connection.php');
 require('./remote.php');
 
+include('./functions.php');
+
 final class bot {
 
 	/* Global socket class used by all bots */
@@ -63,13 +65,13 @@ final class bot {
 
 	/* Global process Queue used by all bots, timers, dcc classes */
 	private $procQueue;
-	
+
 	/* Whether we are running in background mode or not.  (not sure if this is used anymore */
 	private $background = 0;
 
 	//contain all the bots
 	private $bots = array();
-	
+
 	// save the only one instance of bot (singleton)
 	private static $_instance;
 
@@ -89,12 +91,12 @@ final class bot {
 
 		$this->socketClass = new socket();
 		$this->procQueue = new processQueue();
-		
+
 		$this->socketClass->setProcQueue($this->procQueue);
 
 		$this->readConfig();
 	}
-	
+
 	public function launch(){
 
 		foreach($this->bots as $bot)
@@ -192,7 +194,7 @@ final class bot {
 		$bot->timerClass->setProcQueue($this->procQueue);
 
 		$bot->parserClass->init();
-		
+
 		//Okay, this function adds the connect timer and starts up this bot class.
 		$bot->ircClass->init();
 
@@ -241,7 +243,7 @@ final class bot {
 			}
 
 			$config = bot::parseConfig($filename);
-			
+
 			if ($config == false)
 			{
 				echo "Could not spawn bot $filename";
@@ -254,7 +256,7 @@ final class bot {
 
 			$this->bots[] = $bot;
 		}
-		
+
 		if ($isPasswordEncrypt == true)
 		{
 			die("No password submitted on command line! Syntax: bot.php -c <new admin password>\n");
@@ -273,7 +275,7 @@ final class bot {
 			{
 				die("Couldn't find the database file! Make sure it exists!");
 			}
-			
+
 			require_once("./databases/" . $bot->config['usedatabase']. ".php");
 
 			$dbType = $bot->config['usedatabase'];
@@ -325,7 +327,7 @@ final class bot {
 			{
 				$channels = array($channels);
 			}
-			
+
 			foreach ($channels AS $channel)
 			{
 				$chan = $channel;
@@ -362,7 +364,7 @@ final class bot {
 			{
 				$configRaw .= fgets($configFPtr, 1024);
 			}
-			
+
 			fclose($configFPtr);
 
 		}

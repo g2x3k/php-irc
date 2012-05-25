@@ -1,14 +1,6 @@
 <?php
-/*
-
-  ###       THIS MODULE IS FAR FROM DONE AND SOME PROB WONT WORK :)         ####
-
-*/
-
-
 class litecoin_mod extends module
 {
-
   public $title = "litecoin mod for php-irc bot";
   public $author = "by g2x3k";
   public $version = "0.1";
@@ -16,114 +8,9 @@ class litecoin_mod extends module
   public function init()
   {
     //make timer grab stats every 2 mins and cache to make faster ?
-    $this->lcd = new BitcoinClient("http", "xxx", "xxx", "xxx", 9332);
-
-    // block check/announce
-    $args = new argClass();
-    // how often (seconds) in between shuld check local daemons for changes
-    $args->interval = 1;
-    $args->timer = "blockcheck";
-    //start timer once ..
-
-    // !!-TODO: rewrite to pure diff check... //
-    $this->timerClass->removeTimer($args->timer);
-    $this->timerClass->addTimer($args->timer, $this, "timer_blockcheck", $args, $args->interval, false);
-
+    $this->lcd = new BitcoinClient("http", "user", "pass", "localhost", 9332);
   }
 
-
-  public function timer_blockcheck	($args) {
-    // !!-TODO: rewrite to pure diff check... //
-
-    $this->blw["timer"] = true;
-    if (!$this->blockwatch["lastblock"]) {
-      // reset // init
-      $this->blockwatch["lastblock"] = $this->lcd->query("getblockcount");
-      $this->blockwatch["lastwon"] = $this->lcd->query("getblockcount");
-      /*$this->ircClass->privMsg("#pool-x","(re)started monitoring @ block: ". $this->blockwatch["lastblock"]);
-      $this->ircClass->privMsg("#pool-x.eu","(re)started monitoring @ block: ". $this->blockwatch["lastblock"]);*/
-
-    }
-    // diff watcher
-    $diff = $this->lcd->query("getdifficulty");
-    if ($this->blockwatch["lastdiff"] == 0) $this->blockwatch["lastdiff"] = $diff;
-    $odiff = $this->blockwatch["lastdiff"];
-
-    if ($odiff != $diff) {
-      // announce diff change
-      if ($diff > $odiff) {
-        $perc = $diff-$odiff;
-        $perc = round($perc/$diff*100,2);
-        $this->ircClass->privMsg("#pool-x.eu","[4Diff/+$perc%] Difficulity increased $odiff >> $diff");
-
-      }
-      else if ($diff < $odiff) {
-        $perc = $odiff-$diff;
-        $perc = round($perc/$diff*100,2);
-        $this->ircClass->privMsg("#pool-x.eu","[9Diff/-$perc%] Difficulity decreased $odiff >> $diff");
-
-      }
-
-      $this->blockwatch["lastdiff"] = $diff;
-    }
-
-    $result = mysql_query("SELECT n.blockNumber, n.accountAddress, n.confirms, n.timestamp, n.difficulty, n.value, w.id, w.shareCount, w.username FROM winning_shares w, networkBlocks n WHERE w.blockNumber = n.blockNumber ORDER BY w.blockNumber DESC LIMIT 1");
-    $lastwon = mysql_fetch_assoc($result);
-
-    //echo "this: ". $this->lcd->query("getblockcount") ." last: ". $this->blockwatch["lastblock"] ." - our last: $lastwon[blockNumber]\r\n";
-
-    //print_r($lastwon);
-
-    if ($this->blockwatch["lastwon"] < $lastwon["blockNumber"]) {
-
-      /*$_retries = 5;
-      $_sleep = 1;
-      for ($i=1; $shareCount == false or $i >= $retries;$i++) {
-
-
-      }*/
-      if ($lastwon["shareCount"] == 0) {
-        sleep(1);
-        $result = mysql_query("SELECT n.blockNumber, n.accountAddress, n.confirms, n.timestamp, n.difficulty, n.value, w.id, w.shareCount, w.username FROM winning_shares w, networkBlocks n WHERE w.blockNumber = n.blockNumber ORDER BY w.blockNumber DESC LIMIT 1");
-        $lastwon = mysql_fetch_assoc($result);
-        if ($lastwon["shareCount"] == 0) {
-          sleep(1);
-          $result = mysql_query("SELECT n.blockNumber, n.accountAddress, n.confirms, n.timestamp, n.difficulty, n.value, w.id, w.shareCount, w.username FROM winning_shares w, networkBlocks n WHERE w.blockNumber = n.blockNumber ORDER BY w.blockNumber DESC LIMIT 1");
-          $lastwon = mysql_fetch_assoc($result);
-          if ($lastwon["shareCount"] == 0) {
-            sleep(1);
-            $result = mysql_query("SELECT n.blockNumber, n.accountAddress, n.confirms, n.timestamp, n.difficulty, n.value, w.id, w.shareCount, w.username FROM winning_shares w, networkBlocks n WHERE w.blockNumber = n.blockNumber ORDER BY w.blockNumber DESC LIMIT 1");
-            $lastwon = mysql_fetch_assoc($result);
-          }
-        }
-      }
-
-
-      $presult = mysql_query("SELECT n.blockNumber, n.accountAddress, n.confirms, n.timestamp, n.difficulty, w.shareCount, w.username FROM winning_shares w, networkBlocks n WHERE w.blockNumber = n.blockNumber ORDER BY w.blockNumber DESC LIMIT 1,1");
-      $prevblock = mysql_fetch_assoc($presult);
-      $duration = timeDiff(date("c",$prevblock["timestamp"]),date("c",$lastwon["timestamp"]),true,false);
-
-      $username = explode(".", $lastwon["username"]); $worker=$username[1]; $username = $username[0];
-
-      $ourhashrate = mysql_query("SELECT * FROM `settings` WHERE `setting` LIKE 'currenthashrate'");
-      $ourhashrate = mysql_fetch_assoc($ourhashrate);
-      /*$bres = mysql_query("SELECT * FROM ledger WHERE assocBlock = $block_no AND transType = 'BlockBonus'");
-      $brow = mysql_fetch_assoc($bres);*/
-
-      //$this->ircClass->privMsg("#pool-x.dev","Block $lastwon[blockNumber] solved found by $username in $lastwon[shareCount] shares over $duration");
-      //$bonus = ($brow["amount"] ? "+1":"");
-      //$this->ircClass->privMsg("#pool-x","[ANN] Block #$lastwon[blockNumber] found by $username in ".number_format($lastwon["shareCount"])." shares over $duration");
-
-
-     // $this->ircClass->privMsg("#pool-x.eu","[7Block/#$lastwon[blockNumber]] Nr. $lastwon[id] Value: $lastwon[value] LTC Found by $username Slave $worker in ".number_format($lastwon["shareCount"])." shares over $duration current hashrate $ourhashrate[value] KH/s");
-
-    }
-
-    $this->blockwatch["lastwon"] = $lastwon["blockNumber"];
-
-
-    return true;
-  }
   // !!-TODO: rewrite for #litecoin //
   public function priv_help($line, $args) {
     $channel = $line["to"];

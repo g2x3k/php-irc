@@ -8,6 +8,14 @@ class blackjack_mod extends module {
   private $delay = 0;
 
   /*
+  Rules:
+  Players goal is to try and get close to 21 as possible but no more
+  aces are worth 11 in case the sum goes over 21 its worth 1
+  alternative goal, get 5 cards with a total of less then 21 and it will count as a blackjack
+  */
+
+
+  /*
   multiple decks ?
   tables ?
   */
@@ -131,25 +139,87 @@ class blackjack_mod extends module {
 
     $this->ircClass->privMsg($channel, "[BJ/$nick] Your cards: $ucards - total: $usertotal");
 
-    if ($usertotal > 21 && count($this->usercards[$id]) < 5)  {
-      $this->ircClass->privMsg($channel, "[BJ/$nick] Busted .. dealers turn");
-      // show dealer, end game
-      $dealertotal = $this->getTotal($this->dealercards[$id]);
-      foreach ($this->dealercards[$id] as $dealercard) {
-        if (!isset($dcards)) $dcards = $this->cardout($dealercard);
-        else  $dcards .= ", ".$this->cardout($dealercard);
-      }
-      $this->ircClass->privMsg($channel, "[BJ/$nick] House cards: $dcards - total: $dealertotal");
-      if ($dealertotal < 22) $this->ircClass->privMsg($channel, "[BJ/$nick] House wins");
+    if ($usertotal > 21)  {
+      $this->endgame($id, $channel, $nick);
     }
-    elseif (count($this->usercards[$id]) == 5 or $usertotal == 21) {
+    elseif (count($this->usercards[$id]) == 5 AND $usertotal <= 21) {
       $this->ircClass->privMsg($channel, "[BJ/$nick] 21/Blackjack ..");
+      $this->endgame($id, $channel, $nick);
+    }
+    elseif ($usertotal == 21) {
+      $this->ircClass->privMsg($channel, "[BJ/$nick] 21/Blackjack ..");
+      $this->endgame($id, $channel, $nick);
     }
     else {
       $this->ircClass->privMsg($channel, "[BJ/$nick] Avaible actions: !hit, !stand");
     }
   }
 
+  public function endgame($id, $channel, $nick = false) {
+    // endgame
+    // called:
+    // if player has 21
+    // 5 cards with sum less then 21
+    // player chooses to stand
+    // action:
+    // play the dealers turn, determine winner
+    $usertotal = $this->getTotal($this->usercards[$id]);
+
+    // dealers turn
+    $dealertotal = $this->getTotal($this->dealercards[$id]);
+
+    // draw card until reaches 17 or goes bust
+    if ($usertotal >= 17 && $usertotal < 21) $beat = $usertotal;
+    else $beat = 17;
+
+    if ($dealertotal <= $beat && $dealertotal < 21) {
+      while ($dealertotal <= $beat && $dealertotal < $usertotal) {
+        $card = $this->drawcards(1);
+        while (in_array($card,$this->usercards[$id])) {
+          $card = $this->drawcards(1);
+        }
+        array_push($this->dealercards[$id],$card);
+        $dealertotal = $this->getTotal($this->dealercards[$id]);
+      }
+    }
+
+    // show dealer
+    foreach ($this->dealercards[$id] as $dealercard) {
+      if (!isset($dcards)) $dcards = $this->cardout($dealercard);
+      else  $dcards .= ", ".$this->cardout($dealercard);
+    }
+    $this->ircClass->privMsg($channel, "[BJ/$nick] House cards: $dcards - total: $dealertotal - tried to beat: $beat");
+
+    // WHO WON ?
+    if ($usertotal < 22 && $dealertotal < 22) {
+      if ($dealertotal == $usertotal) {
+        $wld = "Draw";
+      }
+      if ($dealertotal > $usertotal) {
+        $wld = "Dealer Wins";
+      }
+      if ($dealertotal < $usertotal) {
+        $wld = "You Win";
+      }
+    }
+    if ($usertotal >= 22 && $dealertotal < 22) {
+      $wld = "Dealer Wins";
+    }
+    if ($usertotal <= 21 && $dealertotal >= 22) {
+      $wld = "You Win";
+
+    }
+    if ($usertotal >= 22 && $dealertotal >= 22) {
+      $wld = "Draw";
+
+    }
+    if ($usertotal >= 22) { $busted = "- Busted !"; }
+
+    $this->ircClass->privMsg($channel, "[BJ/$nick] $wld $busted");
+
+    $this->usercards[$id] = array();
+    $this->dealercards[$id] = array();
+  }
 
   public function priv_stand($line, $args) {
     $channel = $line["to"];
@@ -160,15 +230,13 @@ class blackjack_mod extends module {
       $this->ircClass->privMsg($channel, "[BJ/$nick] No game in progress for $id");
       return;
     }
-
-
-
+    $this->endgame($id, $channel, $nick);
   }
 
   // internal functions
   public function drawcards ($l = 2, $id) {
     for ($i = 0; $i < $l; $i++) {
-
+      $num = rand(1000,9999); // random delay
       mt_srand ((double) microtime() * 9999999);
       $card = mt_rand (0,51);
 
@@ -206,9 +274,6 @@ class blackjack_mod extends module {
     }
     return $total;
   }
-
-
 }
-
 
 ?>

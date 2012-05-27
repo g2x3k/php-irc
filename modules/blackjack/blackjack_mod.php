@@ -101,6 +101,13 @@ class blackjack_mod extends module {
     $this->usercards[$id] = $this->drawcards(2, $id);
     $usertotal = $this->getTotal($this->usercards[$id]);
 
+    // show first dealer card
+    foreach ($this->dealercards[$id] as $dealercard) {
+      if (!isset($dcards)) $dcards = $this->cardout($dealercard);
+      else  $dcards .= ", ***";
+    }
+    $this->ircClass->privMsg($channel, "[BJ/$nick] House cards: $dcards");
+
     foreach ($this->usercards[$id] as $usercard) {
       if (!isset($ucards)) $ucards = $this->cardout($usercard);
       else  $ucards .= ", ".$this->cardout($usercard);

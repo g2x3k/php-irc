@@ -74,13 +74,14 @@ function get_url_contents($url,$post=false,$ref=false,$timeout=10){
 	$header[] = "Pragma: "; // browsers keep this blank.
 
 	//if ($urlconf["usecookies"]) {
-	$cookie = './cookies/cookie.txt';
+/*	$cookie = './cookies/cookie.txt';
 	if (!file_exists("./cookies")) mkdir("./cookies");
 	if (!file_exists($cookie)) die("i want cookies");
 
 	curl_setopt($crl, CURLOPT_COOKIEFILE, $cookie);
 	curl_setopt($crl, CURLOPT_COOKIEJAR, $cookie);
-	//}
+	*/
+	
 	curl_setopt($crl, CURLOPT_CONNECTTIMEOUT, $timeout);
 	curl_setopt($crl, CURLOPT_TIMEOUT, $timeout);
 	curl_setopt($crl, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3');

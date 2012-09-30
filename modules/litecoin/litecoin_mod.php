@@ -73,8 +73,7 @@ class litecoin_mod extends module
     $buy = $this->format_coins($data->ticker->buy);
     $sell = $this->format_coins($data->ticker->sell);
 
-    $spread = (int)$sell-$buy;
-    $spread = str_replace("-", "", $spread);
+    $spread = number_format($buy-$sell,8);
 
     $vol = number_format($data->ticker->vol,3);
     $ltcvol = number_format($vol/$avg,3);

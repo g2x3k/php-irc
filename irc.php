@@ -2405,48 +2405,49 @@ class irc {
 		}
 		else
 		{
-			$user = $this->usageList[$host];
+			$user = $this->usageList[$host];            
+            $floodcheck = $this->getClientConf('floodcheck');
+            
+            if ($floodcheck == true) {
+			     $floodTime = intval($this->getClientConf('floodtime'));
+			     if ($floodTime <= 0)
+			     {
+				        $floodTime = 60;
+			     }
 
-			$floodTime = intval($this->getClientConf('floodtime'));
-			if ($floodTime <= 0)
-			{
-				$floodTime = 60;
-			}
-
-			if ($user->isBanned == true)
-			{
-				if ($user->timeBanned > time() - $floodTime)
-				{
-					return STATUS_ALREADY_BANNED;
-				}
-				$user->isBanned = false;
-			}
+			     if ($user->isBanned == true)
+			     {
+				    if ($user->timeBanned > time() - $floodTime)
+				    {
+				    	return STATUS_ALREADY_BANNED;
+                    }
+				        $user->isBanned = false;
+			     }
 
 
-			if ($user->lastTimeUsed < time() - 10)
-			{
-				$user->timesUsed = 0;
-			}
-			$user->lastTimeUsed = time();
-			$user->timesUsed++;
-		}
+			     if ($user->lastTimeUsed < time() - 10)
+			     {
+				        $user->timesUsed = 0;
+			     }
+			     $user->lastTimeUsed = time();
+                $user->timesUsed++;
+            }
+            $numLines = intval($this->getClientConf('floodlines'));
+            if ($numLines <= 0)
+            {
+                $numLines = 5;
+            }
 
-		$numLines = intval($this->getClientConf('floodlines'));
-		if ($numLines <= 0)
-		{
-			$numLines = 5;
-		}
-
-		if ($user->timesUsed > $numLines)
-		{
-			$user->isBanned = true;
-			$user->timeBanned = time();
-			$user->timesUsed = 0;
-			$user->lastTimeUsed = 0;
-			$this->removeQueues($line['fromNick']);
-			return STATUS_JUST_BANNED;
-		}
-
+            if ($user->timesUsed > $numLines)
+            {
+			     $user->isBanned = true;
+			     $user->timeBanned = time();
+			     $user->timesUsed = 0;
+			     $user->lastTimeUsed = 0;
+			     $this->removeQueues($line['fromNick']);
+			     return STATUS_JUST_BANNED;
+            }
+        }
 		return STATUS_NOT_BANNED;
 	}
 	
@@ -2496,4 +2497,4 @@ class irc {
 	}
 
 }
-
+?>

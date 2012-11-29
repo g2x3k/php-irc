@@ -122,4 +122,9 @@ function get_url_contents($url,$post=false,$ref=false,$timeout=10){
 	curl_close($crl);
 	return $ret;
 }
+function GetJsonFeed($json_url)
+{
+    $feed = file_get_contents($json_url);
+    return json_decode($feed, true);
+}
 ?>

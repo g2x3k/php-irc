@@ -18,32 +18,31 @@ class litecoin_mod extends module
     $host = $line["from"];
     $lookup = str_replace(array(".","!","@"),"",trim($args["arg1"]));
 
-    switch ($lookup) {
-      case "u":
-        $this->ircClass->privMsg("$channel","$lookup [username] - send back info for given user, if no user given, looksup nickname");
-        break;
-      case "rate":
-        $this->ircClass->privMsg("$channel","$lookup <amount> <lcbcusd|lcusd - usdbclc|usdbclc> [buy|sell|last] - convert <amount> of ltc to usd using btc-e ltc->usd or ltc->btc->usd or other way around, default is last trade price");
-        break;
-      case "stats":
-        $this->ircClass->privMsg("$channel","$lookup - returns stats for the pool");
-        break;
-      case "info":
-        $this->ircClass->privMsg("$channel","$lookup - returns network info, blocknumber and diff and current network rate");
-        break;
-      case "estimate":
-        $this->ircClass->privMsg("$channel","$lookup <khps> - returns estimated ltc per day and hour at <khps>, and time to find a block");
-        break;
-      case "ticker":
-        $this->ircClass->privMsg("$channel","$lookup - returns latest market data from btc-e.com litecoin market");
-        break;
+        switch ($lookup) {
+            case "rate":
+                $this->ircClass->privMsg("$channel", "$lookup <amount> <lcbcusd|lcusd - usdbclc|usdbclc> [buy|sell|last] - convert <amount> of ltc to usd using btc-e ltc->usd or ltc->btc->usd or other way around, default is last trade price");
+                break;
+            case "info":
+                $this->ircClass->privMsg("$channel", "$lookup - returns network info, blocknumber and diff and current network rate");
+                break;
+            case "estimate":
+                $this->ircClass->privMsg("$channel", "$lookup <khps> - returns estimated ltc per day and hour at <khps>, and time to find a block");
+                break;
+            case "ticker":
+                $this->ircClass->privMsg("$channel", "$lookup - returns latest market data from btc-e.com litecoin market");
+                break;
 
-      default:
-        $this->ircClass->privMsg("$channel", "Commands for Bot is:");
-        $this->ircClass->privMsg("$channel", "info: !info for network info, !estimate <khps> estimate given output at any khps");
-        $this->ircClass->privMsg("$channel", "market: !ticker for market data, !rate <amount> <lcbcusd|lcusd> [buy|sell|last] convert amount of ltc to usd");
-        //$this->ircClass->privMsg("$channel", "note: [arguments] is optional, <arguments> are required, you can lookup specific command with !help [command]");
-        break;
+            default:
+                $this->ircClass->privMsg("$channel", "Commands for Bot is:");
+                $this->ircClass->privMsg("$channel",
+                    "info: .info for network info, .estimate <khps> estimate given output at any khps");
+                    $this->ircClass->privMsg("$channel", ".diff: See current difficulty & next estimate difficulty");
+                    $this->ircClass->privMsg("$channel", ".pools: See the pools current speed");
+                $this->ircClass->privMsg("$channel",
+                    "market: .ticker for market data, .rate <amount> <lcbcusd|lcusd> [buy|sell|last] convert amount of ltc to usd");
+                $this->ircClass->privMsg("$channel",
+                    "note: [arguments] is optional, <arguments> are required, you can lookup specific command with !help [command]");
+                break;
 
     }
 
@@ -54,7 +53,9 @@ class litecoin_mod extends module
     $nick = $line["fromNick"];
     $host = $line["from"];
 
-    $this->ircClass->privMsg("$channel", "network info [LTC] > Current Block: " . $this->lcd->getblocknumber() . " Difficulty: " . $this->lcd->getdifficulty());
+        $this->ircClass->privMsg("$channel", "network info [LTC] > Current Block: " . $this->
+            lcd->getblockcount() . " Difficulty: " . $this->lcd->getdifficulty() .
+            " Net hashrate: " . $net_hashrate . " Mh/s");
 
   }
 
@@ -202,6 +203,84 @@ class litecoin_mod extends module
     $this->ircClass->privMsg("$channel", "The expected generation output, at $hash KHps, given current difficulty of $diff, is " .
     round($coins_per_day, 6) . " LTC per day, " . round($coins_per_hr, 6) . " LTC per hour, Estimated time to find a block is $estimated_time_find");
   }
+      public function priv_pools($line, $args)
+    {
+
+        $channel = $line["to"];
+        $nick = $line["fromNick"];
+        $host = $line["from"];
+        $hash = trim(str_replace(",", ".", $args["arg1"]));
+        $net_hashrate = $this->lcd->getnetworkhashps() / 1000000;
+        $net_hashrate_new = number_format($net_hashrate, 2, '.', '');
+        $Pool_X = GetJsonFeed("http://pool-x.eu/api");
+        $Pool_X_hashrate = number_format($Pool_X["hashrate"] / 1000, 2);
+        $data[] = array('Pool' => 'PooL-X', 'hashrate' => $Pool_X_hashrate);
+
+        $bittruvianman = GetJsonFeed("http://bittruvianman.com/api");
+        $bittruvianman_hashrate = number_format($bittruvianman["hashrate"] / 1000, 2);
+        $data[] = array('Pool' => 'Bittruvianman', 'hashrate' => $bittruvianman_hashrate);
+
+        $notroll = GetJsonFeed("http://www.notroll.in/api.php");
+        $notroll_hashrate = number_format($notroll["hashrate"] / 1000, 2);
+        $data[] = array('Pool' => 'Notroll.in', 'hashrate' => $notroll_hashrate);
+
+        $litecoinpool = GetJsonFeed("http://www.litecoinpool.org/api");
+        $litecoinpool_hashrate = number_format($litecoinpool["pool"]["hash_rate"] / 1000,
+            2);
+        $data[] = array('Pool' => 'Litecoinpool', 'hashrate' => $litecoinpool_hashrate);
+
+        $ozco = GetJsonFeed("https://lc.ozco.in/api.php");
+        $ozco_hashrate = number_format($ozco["hashrate"] / 1000, 2);
+        $data[] = array('Pool' => 'Ozco', 'hashrate' => $ozco_hashrate);
+
+        $p2p = GetJsonFeed("http://ltcfaucet.com:9327/global_stats");
+        $p2p_hashrate = number_format($p2p["pool_hash_rate"] / 1000000, 2);
+        $data[] = array('Pool' => 'P2Pool', 'hashrate' => $p2p_hashrate);
+
+        $xurious = GetJsonFeed("http://ltc.xurious.com/api");
+        $xurious_hashrate = number_format($xurious["pool"]["hash_rate"] / 1000000, 2);
+        $data[] = array('Pool' => 'Xurious', 'hashrate' => $xurious_hashrate);
+
+        $nushor = GetJsonFeed("http://ltc.nushor.net/api.php");
+        $nushor_hashrate = number_format($nushor["hashrate"] / 1000, 2);
+        $data[] = array('Pool' => 'Nushor', 'hashrate' => $nushor_hashrate);
+
+        $Coinotron = GetJsonFeed("https://www.coinotron.com/coinotron/AccountServlet?action=api");
+        $Coinotron_hashrate = number_format($Coinotron[2]["hashrate"] / 1000000, 2);
+        $data[] = array('Pool' => 'Coinotron', 'hashrate' => $Coinotron_hashrate);
+
+        foreach ($data as $key => $row) {
+            $_hasrate[$key] = $row['hashrate'];
+        }
+        array_multisort($_hasrate, SORT_DESC, $data);
+
+        foreach ($data as $key => $row) {
+            $echo_string .= $row['Pool'] . " " . $row['hashrate'] . " Mh/s - ";
+
+        }
+        $echo_string .= "Network: " . $net_hashrate_new . " Mh/s";
+
+        $this->ircClass->privMsg("$channel", $echo_string);
+
+    }
+        public function priv_diff($line, $args)
+    {
+
+        $channel = $line["to"];
+        $nick = $line["fromNick"];
+        $host = $line["from"];
+        $hash = trim(str_replace(",", ".", $args["arg1"]));
+        $sign1 = "+";
+        $sign2 = "+";
+        $sign3 = "+";
+        $busqueda_bloques = 120;
+        $diff = $this->lcd->getdifficulty();
+        $hashps = $this->lcd->getnetworkhashps();
+        $diff1 = $hashps * 150 / pow(2, 32);
+
+        $this->ircClass->privMsg("$channel", "Current difficulty: $diff  - Next estimate difficulty: $diff1");
+
+    }
 
   // internal functions
   public function format_coins($coins) {

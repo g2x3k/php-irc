@@ -4,7 +4,7 @@ class litecoin_mod extends module
     public $title = "litecoin mod for php-irc bot";
     public $author = "by g2x3k";
     public $contributor = "Greedi";
-    public $version = "0.2";
+    public $version = "0.6.8";
 
     public function init()
     {
@@ -32,6 +32,9 @@ class litecoin_mod extends module
             case "stats":
                 $this->ircClass->privMsg("$channel", "$lookup - returns stats for the pool");
                 break;
+            case "Global":
+                $this->ircClass->privMsg("$channel", "$lookup <Asset> - Will locking trading data from the asset on Litecoin Global");
+                break;
             case "info":
                 $this->ircClass->privMsg("$channel", "$lookup - returns network info, blocknumber and diff and current network rate");
                 break;
@@ -41,9 +44,15 @@ class litecoin_mod extends module
             case "ticker":
                 $this->ircClass->privMsg("$channel", "$lookup - returns latest market data from btc-e.com litecoin market");
                 break;
+            case "up":
+                $this->ircClass->privMsg("$channel", "$lookup - Check if a site is up/down");
+                break;
 
             default:
                 $this->ircClass->privMsg("$channel", "Commands for Bot is:");
+                $this->ircClass->privMsg("$channel",
+                    ".Global: returns latest market data from btc-e.com litecoin market ");
+                $this->ircClass->privMsg("$channel", ".up: Check if a site is up/down");
                 $this->ircClass->privMsg("$channel",
                     ".info: .info for network info, .estimate <khps> estimate given output at any khps");
                 $this->ircClass->privMsg("$channel",
@@ -79,8 +88,10 @@ class litecoin_mod extends module
         $host = $line["from"];
         $data = get_url_contents("https://btc-e.com/api/2/10/ticker");
         $data2 = get_url_contents("https://btc-e.com/api/2/ltc_usd/ticker");
+
         $data = json_decode($data["html"]);
         $data2 = json_decode($data2["html"]);
+
         $lookup = str_replace(array(".", "!", "@"), "", trim($args["arg1"]));
 
         //set + format_coins * fail btc-e api.patch
@@ -151,10 +162,10 @@ class litecoin_mod extends module
         //announce
         switch ($lookup) {
             case "btc":
-                $this->ircClass->privMsg("$channel", "[BTC-E/ticker/BTC] > Last Trade: $lc$last - lowest ask: $bc$buy highest bid: $sc$sell avg: $ac$avg - spread: $spread - high: $high low: $low volume: $vol BTC");
+                $this->ircClass->privMsg("$channel", "[BTC-E/TICKER/BTC] > Last Trade: $lc$last - lowest ask: $bc$buy highest bid: $sc$sell avg: $ac$avg - spread: $spread - high: $high low: $low volume: $vol BTC");
                 break;
             case "usd":
-                $this->ircClass->privMsg("$channel", "[BTC-E/ticker/USD] > Last Trade: $lc2$last2 - lowest ask: $bc2$buy2 highest bid: $sc2$sell2 avg: $ac2$avg2 - spread: $spread2 - high: $high2 low: $low2 volume: $vol2 USD");
+                $this->ircClass->privMsg("$channel", "[BTC-E/TICKER/USD] > Last Trade: $lc2$last2 - lowest ask: $bc2$buy2 highest bid: $sc2$sell2 avg: $ac2$avg2 - spread: $spread2 - high: $high2 low: $low2 volume: $vol2 USD");
                 break;
             default:
                 $this->ircClass->privMsg("$channel", "check input");
@@ -283,9 +294,6 @@ class litecoin_mod extends module
         $nick = $line["fromNick"];
         $host = $line["from"];
         $hash = trim(str_replace(",", ".", $args["arg1"]));
-        $sign1 = "+";
-        $sign2 = "+";
-        $sign3 = "+";
         $busqueda_bloques = 120;
         $diff = $this->lcd->getdifficulty();
         $hashps = $this->lcd->getnetworkhashps();
@@ -294,6 +302,87 @@ class litecoin_mod extends module
         $this->ircClass->privMsg("$channel", "Current difficulty: $diff  - Next estimate difficulty: $diff1");
 
     }
+
+    public function priv_up($line, $args)
+    {
+
+        $channel = $line["to"];
+        $nick = $line["fromNick"];
+        $host = $line["from"];
+        $hash = trim(str_replace(",", ".", $args["arg1"]));
+        if (Visit("" . $args["arg1"] . "")) {
+
+            $this->ircClass->privMsg("$channel", "" . $args["arg1"] . " looks up to me!");
+        } else {
+
+            $this->ircClass->privMsg("$channel", "" . $args["arg1"] . " looks down to me!");
+        }
+    }
+
+    public function priv_global($line, $args)
+    {
+
+        $channel = $line["to"];
+        $nick = $line["fromNick"];
+        $host = $line["from"];
+        $asset = $args["arg1"];
+        $asset = strtoupper($asset);
+        $global = GetJsonFeed("https://litecoinglobal.com/api/ticker/$asset");
+        $global_ticker = $global["ticker"];
+        $global_latest = $global["latest"];
+        if ($global_lastest == "--") {
+            $global_lastest = "N/A";
+        }
+        $global_bid = $global["bid"];
+        if ($global_bid == "--") {
+            $global_bid = "N/A";
+        }
+        $global_ask = $global["ask"];
+        if ($global_ask == "--") {
+            $global_ask = "N/A";
+        }
+        $global_24h_low = $global["24h_low"];
+        if ($global_24h_low == "--") {
+            $global_24h_low = "N/A";
+        }
+        $global_24h_high = $global["24h_high"];
+        if ($global_24h_high == "--") {
+            $global_24h_high = "N/A";
+        }
+        $global_24h_avg = $global["24h_avg"];
+        if ($global_24h_avg == "--") {
+            $global_24h_avg = "N/A";
+        }
+        $global_24h_vol = $global["24h_vol"];
+        if ($global_24h_vol == "--") {
+            $global_24h_vol = "N/A";
+        }
+        $global_7d_avg = $global["7d_avg"];
+        if ($global_7d_avg == "--") {
+            $global_7d_avg = "N/A";
+        }
+        $global_7d_vol = $global["7d_vol"];
+        if ($global_7d_vol == "--") {
+            $global_7d_vol = "N/A";
+        }
+        $global_total_vol = $global["total_vol"];
+        if ($global_total_vol == "--") {
+            $global_total_vol = "N/A";
+        }
+        $global_type = $global["type"];
+        if ($global_type == "--") {
+            $global_type = "N/A";
+        }
+
+        $this->ircClass->privMsg("$channel", "Lastest: " . $global_lastest . " - Bid: " .
+            $global_bid . " - Ask: " . $global_ask . " - 24h low: " . $global_24h_low .
+            " - 24h high: " . $global_24h_high . " - 24h avg: " . $global_24h_avg .
+            " - 24h vol: " . $global_24h_vol . " - 7d avg: " . $global_7d_avg .
+            " - 7d vol: " . $global_7d_vol . " - Total vol: " . $global_total_vol .
+            " - Type: " . $global_type . "");
+
+    }
+
 
     public function priv_pools($line, $args)
     {

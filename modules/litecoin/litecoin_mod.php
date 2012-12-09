@@ -4,7 +4,7 @@ class litecoin_mod extends module
     public $title = "litecoin mod for php-irc bot";
     public $author = "by g2x3k";
     public $contributor = "Greedi";
-    public $version = "0.6.8";
+    public $version = "0.6.9";
 
     public function init()
     {
@@ -303,6 +303,7 @@ class litecoin_mod extends module
 
     }
 
+
     public function priv_up($line, $args)
     {
 
@@ -330,8 +331,8 @@ class litecoin_mod extends module
         $global = GetJsonFeed("https://litecoinglobal.com/api/ticker/$asset");
         $global_ticker = $global["ticker"];
         $global_latest = $global["latest"];
-        if ($global_lastest == "--") {
-            $global_lastest = "N/A";
+        if ($global_latest == "--") {
+            $global_latest = "N/A";
         }
         $global_bid = $global["bid"];
         if ($global_bid == "--") {
@@ -373,13 +374,26 @@ class litecoin_mod extends module
         if ($global_type == "--") {
             $global_type = "N/A";
         }
+        
+                // mm colors
+        if ($global_latest > $global_24h_avg)
+            $lc = 3; //green
+        if ($global_latest < $global_24h_avg)
+            $lc = 7; //orange
+        if ($global_bid < $global_24h_avg)
+            $bc = 3;
+        if ($global_bid > $global_24h_avg)
+            $bc = 7;
+        if ($global_ask > $global_24h_avg)
+            $sc = 3;
+        if ($global_ask < $global_24h_avg)
+            $sc = 7;
+        if ($global_24h_high < $global_24h_avg)
+            $ac = 9; // lightgreen !highlight when avg moves over high
+        if ($global_24h_low > $global_24h_avg)
+            $ac = 4; // red !highlight when avg goes under low
 
-        $this->ircClass->privMsg("$channel", "Lastest: " . $global_lastest . " - Bid: " .
-            $global_bid . " - Ask: " . $global_ask . " - 24h low: " . $global_24h_low .
-            " - 24h high: " . $global_24h_high . " - 24h avg: " . $global_24h_avg .
-            " - 24h vol: " . $global_24h_vol . " - 7d avg: " . $global_7d_avg .
-            " - 7d vol: " . $global_7d_vol . " - Total vol: " . $global_total_vol .
-            " - Type: " . $global_type . " - URL: https://www.litecoinglobal.com/security/".$asset."");
+        $this->ircClass->privMsg("$channel", "Lastest: $global_latest - Bid: $lc$global_bid - Ask: $lc$global_ask - 24h low: $global_24h_low - 24h high: $global_24h_high - 24h avg: $global_24h_avg - 24h vol: $global_24h_vol - 7d avg: $global_7d_avg - 7d vol: $global_7d_vol - Total vol: $global_total_vol - Type: $global_type  - URL: https://www.litecoinglobal.com/security/$asset");
 
     }
 

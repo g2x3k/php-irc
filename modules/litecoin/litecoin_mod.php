@@ -379,7 +379,7 @@ class litecoin_mod extends module
             " - 24h high: " . $global_24h_high . " - 24h avg: " . $global_24h_avg .
             " - 24h vol: " . $global_24h_vol . " - 7d avg: " . $global_7d_avg .
             " - 7d vol: " . $global_7d_vol . " - Total vol: " . $global_total_vol .
-            " - Type: " . $global_type . "");
+            " - Type: " . $global_type . " - URL: https://www.litecoinglobal.com/security/".$asset."");
 
     }
 

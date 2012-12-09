@@ -102,7 +102,7 @@ class serve_mod extends module
         $args->timerid = strtotime(date("Y-m-d 00", time() + 86400) . ":00:00");
         $settimer = $args->timerid - time();
         //start timers
-        $this->ircClass->privMsg("#GreeDiCE", "timer set to run at $args->timerid / " .
+        $this->ircClass->privMsg("#php-irc", "timer set to run at $args->timerid / " .
             date("Y-m-d H:i:s", $args->timerid));
         $this->timerClass->addTimer("serveclear" . $args->timerid, $this, "timer_serve",
             $args, $settimer, false);
@@ -113,14 +113,14 @@ class serve_mod extends module
     {
         //clear daily stats
         $res = mysql_query("UPDATE `servestats` SET `today` = '0'");
-        $this->ircClass->privMsg("#GreeDiCE", "cleared serve_today");
+        $this->ircClass->privMsg("#php-irc", "cleared serve_today");
 
         //timerinfo for nxt day
         $args = new argClass();
         $args->timerid = strtotime(date("Y-m-d 00", time() + 86400) . ":00:00");
         $settimer = $args->timerid - time();
         //start timers
-        $this->ircClass->privMsg("#GreeDiCE", "timer set to run at $args->timerid / " .
+        $this->ircClass->privMsg("#php-irc", "timer set to run at $args->timerid / " .
             date("Y-m-d H:i:s", $args->timerid));
         $this->timerClass->addTimer("serveclear" . $args->timerid, $this, "timer_serve",
             $args, $settimer, false);
@@ -141,10 +141,10 @@ class serve_mod extends module
         if ($line['to'] == $this->ircClass->getNick())
             return; // dont work in private ...
 
-        if ($chan == "#addpre.info" or $chan == "#addpre.ext2" or $chan == "#addpre.ext" or
-            $chan == "#addt" or $chan == "#addpre.ftp" or $chan == "#addpre")
+        if ($chan == "#channel" or $chan == "#channel" or $chan == "#channel" or
+            $chan == "#channel" or $chan == "#channel" or $chan == "#channel")
             return;
-        if ($fromnick == "thorbits" or $fromnick == "thb") // ignored nicks
+        if ($fromnick == "nick" or $fromnick == "nick") // ignored nicks
 
             return;
 

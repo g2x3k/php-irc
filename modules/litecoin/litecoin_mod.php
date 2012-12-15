@@ -4,7 +4,7 @@ class litecoin_mod extends module
     public $title = "litecoin mod for php-irc bot";
     public $author = "by g2x3k";
     public $contributor = "Greedi";
-    public $version = "0.6.9";
+    public $version = "0.6.8";
 
     public function init()
     {
@@ -12,9 +12,69 @@ class litecoin_mod extends module
         $this->lcd = new BitcoinClient("http", "user", "pass",
             "localhost", 9332);
 
+
+        // btc-e check/announce
+        $args = new argClass();
+        // how often (seconds) in between shuld check btc-e api for changes
+        $args->interval = 1;
+        $args->timer = "btcecheck";
+        //start timer once ..
+
+        $this->timerClass->removeTimer($args->timer);
+        $this->timerClass->addTimer($args->timer, $this, "btce_check", $args, $args->
+            interval, false);
+
+        // defines
     }
 
-    // !!-TODO: rewrite for #litecoin //
+    public function btce_check($args)
+    {
+        $resultac = mysql_query("SELECT active FROM btcelive");
+        $ac = mysql_fetch_assoc($resultac);
+        $damit = $ac["active"];
+        //print_r($damit);
+        if ($damit == 0) {
+            $lastwon = 0;
+            $lastwon2 = 0;
+            $btcebtc1 = GetJsonFeed("https://btc-e.com/api/2/ltc_btc/ticker");
+            $btcebtc = $btcebtc1["ticker"]["last"];
+            $btceusd1 = GetJsonFeed("https://btc-e.com/api/2/ltc_usd/ticker");
+            $btceusd = $btceusd1["ticker"]["last"];
+            $this->ircClass->privMsg("#channel", "(re)started monitoring BTC-E @ Last: " . $btcebtc .
+                " BTC - " . $btceusd . " USD");
+            mysql_query("UPDATE btcelive SET active='1'");
+            $lastwon = 0;
+        } else {
+            $resulta = mysql_query("SELECT btclast,usdlast FROM btcelive");
+            $a = mysql_fetch_assoc($resulta);
+            $btcebtc = $a["btclast"];
+            $btceusd = $a["usdlast"];
+            $btcebtc1 = GetJsonFeed("https://btc-e.com/api/2/ltc_btc/ticker");
+            $lastwon = $btcebtc1["ticker"]["last"];
+            $btceusd1 = GetJsonFeed("https://btc-e.com/api/2/ltc_usd/ticker");
+            $lastwon2 = $btceusd1["ticker"]["last"];
+        }
+        if ($btcebtc != $lastwon) {
+            if ($btcebtc < $lastwon) {
+                $co = 9;
+            } else {
+                $co = 4;
+            }
+            mysql_query("UPDATE btcelive SET btclast='$lastwon'");
+            $this->ircClass->privMsg("#channel", "[BTC] Last:$co $lastwon");
+        }
+               if ($btceusd != $lastwon2) {
+            if ($btceusd < $lastwon2) {
+                $co = 9;
+            } else {
+                $co = 4;
+            }
+            mysql_query("UPDATE btcelive SET usdlast='$lastwon2'");
+            $this->ircClass->privMsg("#channel", "[USD] Last:$co $lastwon2");
+        }
+
+        return true;
+    }
     public function priv_help($line, $args)
     {
         $channel = $line["to"];
@@ -79,6 +139,14 @@ class litecoin_mod extends module
             lcd->getblockcount() . " Difficulty: " . $this->lcd->getdifficulty() .
             " Net hashrate: " . $net_hashrate . " Mh/s");
 
+    }
+        public function priv_sync($line, $args)
+    {
+        $channel = $line["to"];
+        $nick = $line["fromNick"];
+        $host = $line["from"];
+        mysql_query("UPDATE btcelive SET active='0'");
+        $this->ircClass->privMsg("$channel", "[Resync] - Join #channel to see live !");
     }
 
     public function priv_ticker($line, $args)
@@ -374,8 +442,8 @@ class litecoin_mod extends module
         if ($global_type == "--") {
             $global_type = "N/A";
         }
-        
-                // mm colors
+
+        // mm colors
         if ($global_latest > $global_24h_avg)
             $lc = 3; //green
         if ($global_latest < $global_24h_avg)
@@ -410,10 +478,6 @@ class litecoin_mod extends module
         $Pool_X = GetJsonFeed("http://pool-x.eu/api");
         $Pool_X_hashrate = number_format($Pool_X["hashrate"] / 1000, 2);
         $data[] = array('Pool' => 'PooL-X', 'hashrate' => $Pool_X_hashrate);
-
-        $bittruvianman = GetJsonFeed("http://bittruvianman.com/api");
-        $bittruvianman_hashrate = number_format($bittruvianman["hashrate"] / 1000, 2);
-        $data[] = array('Pool' => 'Bittruvianman', 'hashrate' => $bittruvianman_hashrate);
 
         $notroll = GetJsonFeed("http://www.notroll.in/api.php");
         $notroll_hashrate = number_format($notroll["hashrate"] / 1000, 2);

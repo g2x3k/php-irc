@@ -4,7 +4,7 @@ class litecoin_mod extends module
     public $title = "litecoin mod for php-irc bot";
     public $author = "by g2x3k";
     public $contributor = "Greedi";
-    public $version = "0.6.8";
+    public $version = "0.7.9";
 
     public function init()
     {

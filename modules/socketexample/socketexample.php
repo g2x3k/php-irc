@@ -28,10 +28,9 @@ class socketexample_mod extends module
             $this->error == true;
             return;
         }
-	if (!$this->error)
-        	$this->siteListener = $conn;
-	//else
-	//	handleerr...
+	
+        $this->siteListener = $conn;
+	.
     }
 
     // socket listen

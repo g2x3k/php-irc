@@ -53,7 +53,16 @@ require('./error.php');
 require('./connection.php');
 require('./remote.php');
 
-include('./functions.php');
+// include other files
+if ($handle = opendir('./includes/')) {
+    while (false !== ($entry = readdir($handle))) {
+        if ($entry != '.' && $entry != '..') {
+            if (preg_match('/.php$/i',$entry))
+                include('./includes/'.$entry);
+        }
+    }
+    closedir($handle);
+}
 
 final class bot {
 

@@ -1290,6 +1290,12 @@ class irc {
 				{
 					$this->nick = $this->tempNick;
 				}
+                // oper login
+                if ($this->getClientConf('operlogin') != "") {
+                    $oper_string = "OPER ".$this->getClientConf('operlogin');
+                    $validate = $this->clientFormat($oper_string);
+                    $this->pushAfter($validate);
+                }
 				break;
 
 			case 005:
@@ -1301,12 +1307,7 @@ class irc {
 						$this->createModeArray();
 						$this->checkChans();
 
-                        // oper login
-                        if ($this->getClientConf('operlogin') != "") {
-                            $oper_string = "OPER ".$this->getClientConf('operlogin');
-                        $validate = $this->clientFormat($oper_string);
-                        $this->pushAfter($validate);
-                        }
+
 					}
 				}
 				break;

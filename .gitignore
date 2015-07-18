@@ -170,3 +170,4 @@ pip-log.txt
 layer13test.conf
 .git/*
 .idea/*
+modules/g2pre/*

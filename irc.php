@@ -1071,8 +1071,9 @@ class irc {
 		$this->timeConnected = time();
 		$this->pushAfter($validate);
 		$this->status = STATUS_CONNECTED_SENTREGDATA;
-		
 		$this->timerClass->addTimer($this->randomHash(), $this, "regTimeout", $this->sockInt, REGISTRATION_TIMEOUT);
+
+
 	}
 
 
@@ -1299,6 +1300,13 @@ class irc {
 					{
 						$this->createModeArray();
 						$this->checkChans();
+
+                        // oper login
+                        if ($this->getClientConf('operlogin') != "") {
+                            $oper_string = "OPER ".$this->getClientConf('operlogin');
+                        $validate = $this->clientFormat($oper_string);
+                        $this->pushAfter($validate);
+                        }
 					}
 				}
 				break;

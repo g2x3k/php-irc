@@ -1,4 +1,8 @@
 <?
+// keep basic functions here ...
+// requires restart for changes to take effect ...
+
+
 // size related
 function mksize($bytes){
     if($bytes < 1000 * 1024){

@@ -190,3 +190,5 @@ layer13function.conf
 l13a.conf
 l13d.conf
 l13convert.conf
+cookies/*
+testing.php

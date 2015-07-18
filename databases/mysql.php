@@ -95,6 +95,10 @@ class mysql {
     $this->isConnected = true;
       return true;
   }
+    public function getInsid()
+    {
+        return (@mysql_insert_id($this->dbIndex));
+    }
   public function getErrno()
     {
         return (@mysql_errno($this->dbIndex));

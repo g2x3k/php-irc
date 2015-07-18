@@ -165,13 +165,27 @@ pip-log.txt
 .DS_Store
 
 ################
+## other stuff
+################
+
+modules/peak_mod/peak.ini
+*.log
+
+################
 ## Own Crap
 ################
 layer13test.conf
 .git/*
 .idea/*
+#priv modules
 modules/g2dev/*
 modules/g2pre/*
 modules/g2trace/*
 modules/AutoDL/*
 modules/l13convert/*
+#conf files
+layer13.conf
+layer13function.conf
+l13a.conf
+l13d.conf
+l13convert.conf

@@ -348,7 +348,7 @@ final class bot {
 
 		if ($configFPtr == null)
 		{
-		//	echo "Could not find config file '".$filename."'\n";
+			echo "Could not find config file '".$filename."'\n";
 			return false;
 		}
 

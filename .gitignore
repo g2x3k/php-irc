@@ -170,4 +170,8 @@ pip-log.txt
 layer13test.conf
 .git/*
 .idea/*
+modules/g2dev/*
 modules/g2pre/*
+modules/g2trace/*
+modules/AutoDL/*
+modules/l13convert/*

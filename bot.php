@@ -35,9 +35,6 @@
 +---------------------------------------------------------------------------
 */
 
-// Own Includes
-require('./includes/bitcoinController/bitcoin.inc.php');
-
 error_reporting(E_ALL);
 set_time_limit(0);
 

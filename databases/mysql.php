@@ -95,7 +95,10 @@ class mysql {
     $this->isConnected = true;
       return true;
   }
-
+  public function getErrno()
+    {
+        return (@mysql_errno($this->dbIndex));
+    }
   public function getError()
   {
     return (@mysql_error($this->dbIndex));
@@ -118,7 +121,7 @@ class mysql {
     if (!is_array($values))
     $values = array($values);
 
-    $query = preg_replace('/\[([0-9]+)]/e', "\$this->fixVar(\\1, \$values)", $query);
+    $query = @preg_replace('/\[([0-9]+)]/e', "\$this->fixVar(\\1, \$values)", $query);
 
     $this->queries++;
 

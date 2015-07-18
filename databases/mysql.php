@@ -81,18 +81,19 @@ class mysql {
 
     if ($db === false)
     {
-      return;
+      return false;
     }
 
     $dBase = mysql_select_db($this->database, $db);
 
     if ($dBase === false)
     {
-      return;
+      return false;
     }
 
     $this->dbIndex = $db;
     $this->isConnected = true;
+      return true;
   }
 
   public function getError()
@@ -126,14 +127,14 @@ class mysql {
     // reconnect if no connection
     if (mysql_errno() == 2006) {
       if ($this->reconnect()) {
-      $data = mysql_query($query  , $this->dbIndex);
+        $data = mysql_query($query  , $this->dbIndex);
       }
       else return;
     }
 
     if (!$data)
     {
-      return;
+      return false;
     }
     else
     return $data;

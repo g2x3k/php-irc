@@ -143,7 +143,7 @@ class urlreveal extends module
                                     $app['cat'][] = "CoOp";
                                 /*if ($cat["description"] == "Single-player") $app['cats'] = "Singleplayer";
                                 if ($cat["description"] == "Single-player") $app['cats'] = "Singleplayer";
-                                if ($cat["description"] == "Single-player") $app['cats'] = "Singleplayer";*/
+                                if ($cat["description"] == "Single-player") $app['cats'] = "Singleplayer";
                             }
                             $app['cat'] = implode("/", $app['cat']);
 
@@ -167,7 +167,7 @@ class urlreveal extends module
 
                         
                     }
-			*/
+			        */
                    /* // Youtube ... update to new api ..
                     if (preg_match("/youtube/i", $title)) {
                         // api override for youtube since have captha
@@ -304,7 +304,7 @@ Vers History:
 -changed to keep-alive connection
 -added UTF-8 support
 -added cookies support
--fixed caseing problems now looks up right url´s for etc youtube where id is case-sens
+-fixed caseing problems now looks up right urlï¿½s for etc youtube where id is case-sens
 -fixed not wrapping out start/end tags in extractstring due to case sens
 0.4:
 -added ignored nicks

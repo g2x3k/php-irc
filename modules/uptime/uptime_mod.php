@@ -102,3 +102,4 @@ class uptime_mod extends module
         return $status;
     }
 }
+?>

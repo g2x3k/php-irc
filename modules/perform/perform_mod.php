@@ -13,6 +13,12 @@ class perform_mod extends module
     public function init()
     {
         // add actions to perform upon connect & reload of the bot here
+
+    }
+
+    public function doPerform()
+    {
+        // add actions to perform upon connect to the server here
         // you shuld only use for on connect stuff oper login etc, tho thats added in the bot.conf
 
         // example

@@ -1644,14 +1644,14 @@ class irc
                 // PLEASE DO NOT CHANGE THE FOLLOWING LINE OF CODE.  It is the only way for people to know that this project
                 // exists.  If you would like to change it, please leave the project name/version or url in there somewhere,
                 // so that others may find this project as you have. :)
-                $msg = "PHP-iRC v" . VERSION . " [" . VERSION_DATE . "] by Manick (visit http://www.phpbots.org/ to download)";
+                $msg = "PHP-iRC v" . VERSION . " [" . VERSION_DATE . "] by Manick, (visit http://www.phpbots.org/ to download) - maintained by g2x3k [at] https://github.com/g2x3k/php-irc";
                 $this->notice($this->lVars['fromNick'], chr(1) . $msg . chr(1));
-                $msg = "";
-                $this->showModules($this->lVars['fromNick']);
+                //$msg = "";
+                //$this->showModules($this->lVars['fromNick']);
                 break;
 
             case "time":
-                $msg = date("D M d H:i:s Y");
+                $msg =  date("D M d H:i:s Y");
                 break;
 
             case "uptime":

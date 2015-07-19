@@ -84,13 +84,29 @@ class	addTimer($name, $class, $function, $args, $interval, $runRightAway = false
 class	getTimers()
 void	removeTimer($timer) (MUST be name)
 
-mysql/postgre.php (Accessed with $this->db->)
+databases/postgre.php (Accessed with $this->db->)
 ---------------------------------------------
 array	queryFetch($query)
 array	fetchArray($object)
 array	fetchRow($object)
 string	getError()
 bool	isConnected()
+int	lastID()
+int	numRows($toFetch)
+int	numQueries()
+void	close()
+object	query($query)
+
+databases/mysql.php (Accessed with $this->db->)
+---------------------------------------------
+array	queryFetch($query)
+array	fetchArray($object)
+array	fetchRow($object)
+string	getError()
+string	getErrno()
+string	getInsid()
+bool	isConnected()
+bool	reconnect()
 int	lastID()
 int	numRows($toFetch)
 int	numQueries()
@@ -510,6 +526,18 @@ string	getError()
 ----------------------------------
 
 Does mysql_error();
+
+----------------------------------
+string	getErrno()
+----------------------------------
+
+Does mysql_errno();
+
+----------------------------------
+string	getInsid()
+----------------------------------
+
+Does mysql_insert_id();
 
 
 ----------------------------------

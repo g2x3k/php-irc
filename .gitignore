@@ -170,6 +170,7 @@ pip-log.txt
 
 modules/peak_mod/peak.ini
 *.log
+*/peak.ini
 
 ################
 ## Own Crap

@@ -1,5 +1,5 @@
 <?php
-class g2pre_mod extends module
+class banip_mod extends module
 {
     public $title = "BanIP";
     public $author = "g2x3k";

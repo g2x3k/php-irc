@@ -1231,7 +1231,7 @@ class irc
                 break;
 
             case 381:
-                    define("IRCOP", 1);
+                    $this->IRCOP = true;
                 break;
 
             case 401:

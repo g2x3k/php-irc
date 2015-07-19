@@ -195,9 +195,6 @@ define('AND_MATCH', 1);
 define('OR_MATCH', 2);
 define('CONTAINS_MATCH', 3);
 
-//For use in mods
-define("IRCOP", 0);
-
 //Used in socket class to keep track of sockets
 
 class socketInfo

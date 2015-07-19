@@ -145,8 +145,6 @@ function get_url_contents($url,$post=false,$ref=false,$timeout=10){
 	$ret["size"] = curl_getinfo($crl, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 	$ret["type"] = curl_getinfo($crl, CURLINFO_CONTENT_TYPE);
 
-	echo "\r\n - REQUEST - ". curl_getinfo($crl, CURLINFO_HEADER_OUT)."\r\n";
-
 	$ret["redirtime"] = number_format(curl_getinfo($crl, CURLINFO_REDIRECT_TIME), 2);
 	$ret["dnslookup"] = number_format(curl_getinfo($crl, CURLINFO_NAMELOOKUP_TIME), 2);
 	$ret["connection"] = number_format(curl_getinfo($crl, CURLINFO_CONNECT_TIME), 2);

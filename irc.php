@@ -1651,7 +1651,7 @@ class irc
                 break;
 
             case "time":
-                $msg = "My current time is " . date("l, F jS, Y @ g:i a O", time()) . ".";
+                $msg = date("D M d H:i:s Y");
                 break;
 
             case "uptime":

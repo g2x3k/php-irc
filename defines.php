@@ -118,8 +118,8 @@ else if ($OS == 'unix')
 }
 
 // Version Definition
-define('VERSION', '2.2.1');
-define('VERSION_DATE', '04/08/06');
+define('VERSION', '2.2.2');
+define('VERSION_DATE', '19/07/2015');
 
 // Timer declarations
 define('NICK_CHECK_TIMEOUT', 120); //seconds

@@ -1230,6 +1230,10 @@ class irc
                 $this->setChannelData($channel, "bancomplete", 1);
                 break;
 
+            case 381:
+                    define("IRCOP", 1);
+                break;
+
             case 401:
                 $this->removeQueues($this->lVars['params']);
                 break;

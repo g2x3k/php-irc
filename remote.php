@@ -37,176 +37,167 @@
 
 /* Remote, a class to handle addQuery connection from ircClass */
 
-class remote {
+class remote
+{
 
-	//External Classes
-	private $socketClass;
-	private $ircClass;
-	private $timerClass;
+    //External Classes
+    private $socketClass;
+    private $ircClass;
+    private $timerClass;
 
-	//Internal variables
-	private $host;
-	private $port;
-	private $query;
-	private $line;
-	private $class;
-	private $function;
-	private $connTimeout;
-	private $transTimeout;
-	private $sockInt;
-	private $connection;
-	private $connected;
-	
-	//Output internal variables
-	private $response;
-	private $type;
+    //Internal variables
+    private $host;
+    private $port;
+    private $query;
+    private $line;
+    private $class;
+    private $function;
+    private $connTimeout;
+    private $transTimeout;
+    private $sockInt;
+    private $connection;
+    private $connected;
 
-	function __construct($host, $port, $query, $line, $class, $function, $transTimeout)
-	{
-		$this->host = $host;
-		$this->port = $port;
-		$this->query = $query;
-		$this->line = $line;
-		$this->class = $class;
-		$this->function = $function;
-		$this->transTimeout = $transTimeout;
-		$this->response = "";
-		$this->connected = false;
-		$this->type = QUERY_SUCCESS;
-	}
+    //Output internal variables
+    private $response;
+    private $type;
 
-	public function setSocketClass($class)
-	{
-		$this->socketClass = $class;
-	}
+    function __construct($host, $port, $query, $line, $class, $function, $transTimeout)
+    {
+        $this->host = $host;
+        $this->port = $port;
+        $this->query = $query;
+        $this->line = $line;
+        $this->class = $class;
+        $this->function = $function;
+        $this->transTimeout = $transTimeout;
+        $this->response = "";
+        $this->connected = false;
+        $this->type = QUERY_SUCCESS;
+    }
 
-	public function setIrcClass($class)
-	{
-		$this->ircClass = $class;
-	}
+    public function setSocketClass($class)
+    {
+        $this->socketClass = $class;
+    }
 
-	public function setTimerClass($class)
-	{
-		$this->timerClass = $class;
-	}
+    public function setIrcClass($class)
+    {
+        $this->ircClass = $class;
+    }
 
-	public function connect()
-	{
-		if ($this->host == null || $this->port == null)
-		{
-			return false;
-		}
+    public function setTimerClass($class)
+    {
+        $this->timerClass = $class;
+    }
 
-		if (!is_object($this->socketClass))
-		{
-			return false;
-		}
+    public function connect()
+    {
+        if ($this->host == null || $this->port == null) {
+            return false;
+        }
 
-		if (!is_object($this->ircClass))
-		{
-			return false;
-		}
+        if (!is_object($this->socketClass)) {
+            return false;
+        }
 
-		$conn = new connection($this->host, $this->port, CONNECT_TIMEOUT);
+        if (!is_object($this->ircClass)) {
+            return false;
+        }
 
-		$conn->setSocketClass($this->socketClass);
-		$conn->setIrcClass($this->ircClass);
-		$conn->setCallbackClass($this);
-		$conn->setTimerClass($this->timerClass);
+        $conn = new connection($this->host, $this->port, CONNECT_TIMEOUT);
 
-		/* Set Timeouts */
-		$conn->setTransTimeout($this->transTimeout);
+        $conn->setSocketClass($this->socketClass);
+        $conn->setIrcClass($this->ircClass);
+        $conn->setCallbackClass($this);
+        $conn->setTimerClass($this->timerClass);
 
-		$conn->init();
+        /* Set Timeouts */
+        $conn->setTransTimeout($this->transTimeout);
 
-		if ($conn->getError())
-		{
-			$this->setError("Could not allocate socket");
-			return false;
-		}
+        $conn->init();
 
-		$this->sockInt = $conn->getSockInt();
-		$conn->connect();
-		
-		$this->connection = $conn;
+        if ($conn->getError()) {
+            $this->setError("Could not allocate socket");
+            return false;
+        }
 
-		return true;
-	}
+        $this->sockInt = $conn->getSockInt();
+        $conn->connect();
 
-	public function disconnect()
-	{
-		$this->connection->disconnect();
-		$this->setError("Manual disconnect");
-	}
+        $this->connection = $conn;
 
-	/* Specific handling functions */
+        return true;
+    }
 
-	public function onTransferTimeout($conn)
-	{
-		$this->connection->disconnect();
-		$this->setError("The connection timed out");
-	}
+    public function disconnect()
+    {
+        $this->connection->disconnect();
+        $this->setError("Manual disconnect");
+    }
 
-	public function onConnectTimeout($conn)
-	{
-		$this->connection->disconnect();
-		$this->setError("Connection attempt timed out");
-	}
+    /* Specific handling functions */
 
-	public function onConnect($conn)
-	{
-		$this->connected = true;
-		$this->socketClass->sendSocket($this->sockInt, $this->query);
-	}
+    public function onTransferTimeout($conn)
+    {
+        $this->connection->disconnect();
+        $this->setError("The connection timed out");
+    }
 
-	public function onRead($conn)
-	{
-		$this->response .= $this->socketClass->getQueue($this->sockInt);
-	}
+    public function onConnectTimeout($conn)
+    {
+        $this->connection->disconnect();
+        $this->setError("Connection attempt timed out");
+    }
 
-	public function onWrite($conn)
-	{
-		// do nothing, we really don't care about this
-	}
+    public function onConnect($conn)
+    {
+        $this->connected = true;
+        $this->socketClass->sendSocket($this->sockInt, $this->query);
+    }
 
-	public function onDead($conn)
-	{
-		$this->connection->disconnect();
+    public function onRead($conn)
+    {
+        $this->response .= $this->socketClass->getQueue($this->sockInt);
+    }
 
-		if ($this->connected === true)
-		{
-			$this->doCallback();
-		}
-		else
-		{
-			$this->setError($this->connection->getErrorMsg());
-		}
+    public function onWrite($conn)
+    {
+        // do nothing, we really don't care about this
+    }
 
-	}
-	
-	/* Error handling */
-	
-	private function setError($msg)
-	{
-		$this->response = $msg;
-		$this->type = QUERY_ERROR;
-		$this->doCallback();
-	}
+    public function onDead($conn)
+    {
+        $this->connection->disconnect();
 
-	private function doCallback()
-	{
-		if ($this->line != null && is_array($this->line) && isset($this->line['text']))
-		{
-			$lineArgs = parser::createLine($this->line['text']);
-		}
-		else
-		{
-			$lineArgs = array();
-		}
+        if ($this->connected === true) {
+            $this->doCallback();
+        } else {
+            $this->setError($this->connection->getErrorMsg());
+        }
 
-		$func = $this->function;
-		$this->class->$func($this->line, $lineArgs, $this->type, $this->response);
-	}
+    }
+
+    /* Error handling */
+
+    private function setError($msg)
+    {
+        $this->response = $msg;
+        $this->type = QUERY_ERROR;
+        $this->doCallback();
+    }
+
+    private function doCallback()
+    {
+        if ($this->line != null && is_array($this->line) && isset($this->line['text'])) {
+            $lineArgs = parser::createLine($this->line['text']);
+        } else {
+            $lineArgs = array();
+        }
+
+        $func = $this->function;
+        $this->class->$func($this->line, $lineArgs, $this->type, $this->response);
+    }
 
 }
 

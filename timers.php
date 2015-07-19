@@ -70,165 +70,151 @@
  * which are a lot better! GEEZ!
  */
 
-class timers {
+class timers
+{
 
-	//Local variables
-	private $timerStack = array();	//list of all timers indexed by name
+    //Local variables
+    private $timerStack = array();    //list of all timers indexed by name
 
-	//External Classes
-	private $procQueue;
-	private $socketClass;
-	private $ircClass;
-	
-	//Private list of reserved php-irc timer names (please do not
-	//use these names)
-	private $reserved = array(	"listening_timer_[0-9]*",
-								"check_nick_timer",
-								"check_channels_timer",
-								"check_ping_timeout_timer",
-						);
+    //External Classes
+    private $procQueue;
+    private $socketClass;
+    private $ircClass;
 
-	public function __construct()
-	{
-		$this->time = time();
-		$this->timerStack = array();
-	}
+    //Private list of reserved php-irc timer names (please do not
+    //use these names)
+    private $reserved = array("listening_timer_[0-9]*",
+        "check_nick_timer",
+        "check_channels_timer",
+        "check_ping_timeout_timer",
+    );
 
-	public function setSocketClass($class)
-	{
-		$this->socketClass = $class;
-	}
+    public function __construct()
+    {
+        $this->time = time();
+        $this->timerStack = array();
+    }
 
-	public function setIrcClass($class)
-	{
-		$this->ircClass = $class;
-	}
+    public function setSocketClass($class)
+    {
+        $this->socketClass = $class;
+    }
 
-	public function setProcQueue($class)
-	{
-		$this->procQueue = $class;
-	}
+    public function setIrcClass($class)
+    {
+        $this->ircClass = $class;
+    }
 
-	public static function getMicroTime()
-	{
-		return microtime(true);
-	}
+    public function setProcQueue($class)
+    {
+        $this->procQueue = $class;
+    }
 
-	public function getTimers()
-	{
-		return $this->timerStack;
-	}
+    public static function getMicroTime()
+    {
+        return microtime(true);
+    }
 
-	public function handle($timer)
-	{
-		$microTime = self::getMicroTime();
+    public function getTimers()
+    {
+        return $this->timerStack;
+    }
 
-		if (!isset($this->timerStack[$timer->name]))
-		{
-			return false;
-		}
+    public function handle($timer)
+    {
+        $microTime = self::getMicroTime();
 
-		if ($this->timerStack[$timer->name] !== $timer)
-		{
-			return false;
-		}
+        if (!isset($this->timerStack[$timer->name])) {
+            return false;
+        }
 
-		$timer->lastTimeRun = $microTime;
-		$timer->nextRunTime = $microTime + $timer->interval;
+        if ($this->timerStack[$timer->name] !== $timer) {
+            return false;
+        }
 
-		if ($timer->class != null)
-		{
-			$theFunc = $timer->func;
-			$status = $timer->class->$theFunc($timer->args);
-		}
-		else
-		{
-			$theFunc = $timer->func;
-			$status = $theFunc($timer->args);
-		}
+        $timer->lastTimeRun = $microTime;
+        $timer->nextRunTime = $microTime + $timer->interval;
 
-		if ($status != true)
-		{
-			$this->removeTimer($timer->name);
-		}
-		else
-		{
-			$this->procQueue->addQueue($this->ircClass, $this, "handle", $timer, $timer->interval);
-		}
+        if ($timer->class != null) {
+            $theFunc = $timer->func;
+            $status = $timer->class->$theFunc($timer->args);
+        } else {
+            $theFunc = $timer->func;
+            $status = $theFunc($timer->args);
+        }
 
-		return false;
-	}
+        if ($status != true) {
+            $this->removeTimer($timer->name);
+        } else {
+            $this->procQueue->addQueue($this->ircClass, $this, "handle", $timer, $timer->interval);
+        }
 
-	public function removeAllTimers()
-	{
-		foreach ($this->timerStack AS $timer)
-		{
-			$this->removeTimer($timer->name);
-		}
-	}
+        return false;
+    }
+
+    public function removeAllTimers()
+    {
+        foreach ($this->timerStack AS $timer) {
+            $this->removeTimer($timer->name);
+        }
+    }
 
 
-	public function addTimer($name, $class, $function, $args, $interval, $runRightAway = false)
-	{
-		if (trim($name) == "")
-		{
-			return false;
-		}
+    public function addTimer($name, $class, $function, $args, $interval, $runRightAway = false)
+    {
+        if (trim($name) == "") {
+            return false;
+        }
 
-		if (isset($this->timerStack[$name]))
-		{
-			return false;
-		}
+        if (isset($this->timerStack[$name])) {
+            return false;
+        }
 
-		$newTimer = new timer;
+        $newTimer = new timer;
 
-		$newTimer->name = $name;
-		$newTimer->class = $class;
-		$newTimer->func = $function;
-		$newTimer->args = $args;
-		$newTimer->interval = $interval;
-		$newTimer->removed = false;
+        $newTimer->name = $name;
+        $newTimer->class = $class;
+        $newTimer->func = $function;
+        $newTimer->args = $args;
+        $newTimer->interval = $interval;
+        $newTimer->removed = false;
 
-		if ($runRightAway == false)
-		{
-			$newTimer->lastTimeRun = $this->getMicroTime();
-			$newTimer->nextRunTime = $this->getMicroTime() + $interval;
-			$tInterval = $interval;
-		}
-		else
-		{
-			$newTimer->lastTimeRun = 0;
-			$newTimer->nextRunTime = $this->getMicroTime();
-			$tInterval = 0;
-		}
+        if ($runRightAway == false) {
+            $newTimer->lastTimeRun = $this->getMicroTime();
+            $newTimer->nextRunTime = $this->getMicroTime() + $interval;
+            $tInterval = $interval;
+        } else {
+            $newTimer->lastTimeRun = 0;
+            $newTimer->nextRunTime = $this->getMicroTime();
+            $tInterval = 0;
+        }
 
-		$this->procQueue->addQueue($this->ircClass, $this, "handle", $newTimer, $tInterval);
+        $this->procQueue->addQueue($this->ircClass, $this, "handle", $newTimer, $tInterval);
 
-		$this->timerStack[$newTimer->name] = $newTimer;
+        $this->timerStack[$newTimer->name] = $newTimer;
 
-		return $name;
-	}
+        return $name;
+    }
 
-	/* Remove the current timer from both the list and stack, changed in 2.1.2, can only call by
-	 * timer name now.
-	 */
-	public function removeTimer($name)
-	{
-		if (!isset($this->timerStack[$name]))
-		{
-			return false;
-		}
+    /* Remove the current timer from both the list and stack, changed in 2.1.2, can only call by
+     * timer name now.
+     */
+    public function removeTimer($name)
+    {
+        if (!isset($this->timerStack[$name])) {
+            return false;
+        }
 
-		//Set removed flag,
-		$this->timerStack[$name]->removed = true;
+        //Set removed flag,
+        $this->timerStack[$name]->removed = true;
 
-		//Remove from stack
-		unset($this->timerStack[$name]->args);
-		unset($this->timerStack[$name]->class);
-		unset($this->timerStack[$name]);
+        //Remove from stack
+        unset($this->timerStack[$name]->args);
+        unset($this->timerStack[$name]->class);
+        unset($this->timerStack[$name]);
 
-		return true;
-	}
+        return true;
+    }
 
 }
 

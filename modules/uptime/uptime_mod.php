@@ -1,4 +1,5 @@
 <?php
+
 class uptime_mod extends module
 {
 
@@ -9,7 +10,7 @@ class uptime_mod extends module
 
     public function init()
     {
-    
+
 
     }
 
@@ -29,7 +30,7 @@ class uptime_mod extends module
             "] by Manick, maintained by g2x3k (visit https://github.com/g2x3k/php-irc to download)");
         $this->ircClass->privMsg($channel, "total running time of " . $this->ircClass->
             timeFormat($this->ircClass->getRunTime(),
-            "%d days, %h hours, %m minutes, and %s seconds."));
+                "%d days, %h hours, %m minutes, and %s seconds."));
 
 
         //$chat->dccSend("PHP-IRC v" . VERSION . " [".VERSION_DATE."] by Manick (visit http://phpbots.sf.net/ to download)");
@@ -102,4 +103,5 @@ class uptime_mod extends module
         return $status;
     }
 }
+
 ?>

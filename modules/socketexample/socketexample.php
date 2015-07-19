@@ -1,4 +1,5 @@
 <?php
+
 class socketexample_mod extends module
 {
 
@@ -14,7 +15,7 @@ class socketexample_mod extends module
         $this->error = false;
         $this->port = 3666;
         $this->annpass = "somepassword";
-	// socket init
+        // socket init
         $conn = new connection(null, $this->port, 0);
         $conn->setSocketClass($this->socketClass);
         $conn->setIrcClass($this->ircClass);
@@ -28,9 +29,9 @@ class socketexample_mod extends module
             $this->error == true;
             return;
         }
-	
+
         $this->siteListener = $conn;
-	.
+        .
     }
 
     // socket listen
@@ -55,7 +56,7 @@ class socketexample_mod extends module
             elseif ($action == "raw")
                 $this->ircClass->sendRaw($content);
         }
-       
+
     }
 
     public function onAccept($oldConn, $newConn)
@@ -63,14 +64,17 @@ class socketexample_mod extends module
         /* dummy */
         $this->onConnect($newConn);
     }
+
     public function onConnect($conn)
     {
         /* dummy */
     }
+
     public function onDead($conn)
     {
         $conn->disconnect();
     }
+
     public function onTransferTimeout($conn)
     {
         /* dummy */

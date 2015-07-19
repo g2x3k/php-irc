@@ -19,7 +19,7 @@ class urlreveal extends module
         $urlconf["output"] = "7URL ([urlinfo]) - 7Title: [title] - 7Speed: " . $this->
             mksize($res["speed"]) . "/s";
     }
-    
+
     public function priv_urlreveal($line, $args)
     {
         $exectimer = xtimer(); // started timer
@@ -39,7 +39,7 @@ class urlreveal extends module
         $skipchan[] = "#addt";
         $skipchan[] = "#coders";
         $skipchan[] = "#addpre.backfill";
-        
+
 
         if (in_array($channel, $skipchan))
             return;
@@ -56,13 +56,13 @@ class urlreveal extends module
             $url = $matches[0];
 
             $res = $this->get_url_contents("$url"); // get url contents
-            if (!preg_match("/<title>/i",  $res["html"]))
-                $title = "NO FkInG <TiTLE> WeB 2.0 Now without title tags ...";                        
+            if (!preg_match("/<title>/i", $res["html"]))
+                $title = "NO FkInG <TiTLE> WeB 2.0 Now without title tags ...";
             else
                 $title = html_entity_decode($this->extractstring("<title>", "<\/title>", $res["html"])); //extract the title
-                                                                            
+
             $nurl = urldecode($res["url"]); // set new "niceurl"
- 
+
             if (preg_match("/image/i", $res["type"])) {
                 // url is image return img stats
                 $surl = substr(str_replace($urlstrip, "", $url), 0, 20);
@@ -115,77 +115,77 @@ class urlreveal extends module
                     // extensions ...
 
                     // Steam store ... not working yet ...
-			/*
-                    if (preg_match("/store.steampowered.com/i", $url)) {
-                        echo "STEAM STORE URL\n";
-                        $appID = preg_match("/\/([0-9]+)/i", $url, $matches);
-                        $appID = $appID[1];
-                        $storeinfo = json_decode(file_get_contents("http://store.steampowered.com/api/appdetails?appids=$appID"), true);
-                        
-                            $d = $storeinfo[$appID]["data"];
+                    /*
+                            if (preg_match("/store.steampowered.com/i", $url)) {
+                                echo "STEAM STORE URL\n";
+                                $appID = preg_match("/\/([0-9]+)/i", $url, $matches);
+                                $appID = $appID[1];
+                                $storeinfo = json_decode(file_get_contents("http://store.steampowered.com/api/appdetails?appids=$appID"), true);
 
-                            echo "got store data ..";
-                            $app['name'] = $d['name'];
-                            $app['www'] = $d["website"];
-                            $app['price']["currency"] = $d['price_overview']["currency"];
-                            $app['price']["normal"] = $d['price_overview']["initial"] / 100;
-                            $app['price']["current"] = $d['price_overview']["final"] / 100;
-                            $app['price']["discountperc"] = $d['price_overview']["discount_percent"];
+                                    $d = $storeinfo[$appID]["data"];
 
-                            foreach ($d['categories'] as $cat) {
-                                if ($cat["description"] == "Single-player")
-                                    $app['cat'][] = "Singleplayer";
-                                if ($cat["description"] == "Multi-player")
-                                    $app['cat'][] = "Multiplayer";
-                                if ($cat["description"] == "MMO")
-                                    $app['cat'][] = "MMORPG";
-                                if ($cat["description"] == "Co-op")
-                                    $app['cat'][] = "CoOp";
-                                /*if ($cat["description"] == "Single-player") $app['cats'] = "Singleplayer";
-                                if ($cat["description"] == "Single-player") $app['cats'] = "Singleplayer";
-                                if ($cat["description"] == "Single-player") $app['cats'] = "Singleplayer";
+                                    echo "got store data ..";
+                                    $app['name'] = $d['name'];
+                                    $app['www'] = $d["website"];
+                                    $app['price']["currency"] = $d['price_overview']["currency"];
+                                    $app['price']["normal"] = $d['price_overview']["initial"] / 100;
+                                    $app['price']["current"] = $d['price_overview']["final"] / 100;
+                                    $app['price']["discountperc"] = $d['price_overview']["discount_percent"];
+
+                                    foreach ($d['categories'] as $cat) {
+                                        if ($cat["description"] == "Single-player")
+                                            $app['cat'][] = "Singleplayer";
+                                        if ($cat["description"] == "Multi-player")
+                                            $app['cat'][] = "Multiplayer";
+                                        if ($cat["description"] == "MMO")
+                                            $app['cat'][] = "MMORPG";
+                                        if ($cat["description"] == "Co-op")
+                                            $app['cat'][] = "CoOp";
+                                        /*if ($cat["description"] == "Single-player") $app['cats'] = "Singleplayer";
+                                        if ($cat["description"] == "Single-player") $app['cats'] = "Singleplayer";
+                                        if ($cat["description"] == "Single-player") $app['cats'] = "Singleplayer";
+                                    }
+                                    $app['cat'] = implode("/", $app['cat']);
+
+
+                                    foreach ($d['genres'] as $genre)
+                                        $genres[] = str_replace(array("Free to Play", "Massively Multiplayer"), array("F2P",
+                                            "MMO"), $genre["description"]);
+                                    $app["genre"] = implode("/", $genres);
+
+                                    if ($d['platforms']['windows'])
+                                        $app['platform'][] = "Win";
+                                    if ($d['platforms']['mac'])
+                                        $app['platform'][] = "Mac";
+                                    if ($d['platforms']['linux'])
+                                        $app['platform'][] = "Linux";
+                                    $app['platform'] = implode("/", $app["platform"]);
+
+                                    $title = $app["name"]. "on SteamStore";
+                                $sumup = "7Cat: $app[cat] - 7Platform: $platfrom - 7Price: ".$app["app"]["price"]." $app[currency] ".($app['price']["discountperc"] ? "(On sale save ".$app['price']["discountperc"]."%)":"");
+
+
+
                             }
-                            $app['cat'] = implode("/", $app['cat']);
+                            */
+                    /* // Youtube ... update to new api ..
+                     if (preg_match("/youtube/i", $title)) {
+                         // api override for youtube since have captha
+                         $purl = parse_url($url);
+                         $purl = explode("&", $purl["query"]);
 
+                         foreach ($purl as $pu)
+                             if (substr($pu, 0, 2) == "v=")
+                                 $vidID = substr($pu, 2);
 
-                            foreach ($d['genres'] as $genre)
-                                $genres[] = str_replace(array("Free to Play", "Massively Multiplayer"), array("F2P",
-                                    "MMO"), $genre["description"]);
-                            $app["genre"] = implode("/", $genres);
-
-                            if ($d['platforms']['windows'])
-                                $app['platform'][] = "Win";
-                            if ($d['platforms']['mac'])
-                                $app['platform'][] = "Mac";
-                            if ($d['platforms']['linux'])
-                                $app['platform'][] = "Linux";
-                            $app['platform'] = implode("/", $app["platform"]);
-                            
-                            $title = $app["name"]. "on SteamStore";
-                        $sumup = "7Cat: $app[cat] - 7Platform: $platfrom - 7Price: ".$app["app"]["price"]." $app[currency] ".($app['price']["discountperc"] ? "(On sale save ".$app['price']["discountperc"]."%)":"");
-                        
-
-                        
-                    }
-			        */
-                   /* // Youtube ... update to new api ..
-                    if (preg_match("/youtube/i", $title)) {
-                        // api override for youtube since have captha
-                        $purl = parse_url($url);
-                        $purl = explode("&", $purl["query"]);
-
-                        foreach ($purl as $pu)
-                            if (substr($pu, 0, 2) == "v=")
-                                $vidID = substr($pu, 2);
-
-                        $apiurl = "http://gdata.youtube.com/feeds/api/videos/" . $vidID;
-                        $doc = new DOMDocument;
-                        $doc->load($apiurl);
-                        $title = $doc->getElementsByTagName("title")->item(0)->nodeValue .
-                            " - 1,0 You0,4tube ";
-                        $sumup = $doc->getElementsByTagName("content")->item(0)->nodeValue;
-                    }
-*/
+                         $apiurl = "http://gdata.youtube.com/feeds/api/videos/" . $vidID;
+                         $doc = new DOMDocument;
+                         $doc->load($apiurl);
+                         $title = $doc->getElementsByTagName("title")->item(0)->nodeValue .
+                             " - 1,0 You0,4tube ";
+                         $sumup = $doc->getElementsByTagName("content")->item(0)->nodeValue;
+                     }
+ */
 
                     $et = rtrxtime($exectimer);
                     $wasted = $res[connection] + $res[redirtime];
@@ -232,7 +232,7 @@ class urlreveal extends module
         curl_setopt($crl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($crl, CURLOPT_AUTOREFERER, 1);
         curl_setopt($crl, CURLOPT_SSL_VERIFYPEER, false);
-        
+
 
         $ret["html"] = curl_exec($crl);
         $ret["url"] = curl_getinfo($crl, CURLINFO_EFFECTIVE_URL);
@@ -248,6 +248,7 @@ class urlreveal extends module
         curl_close($crl);
         return $ret;
     }
+
     public function extractstring($start, $end, $text, $casesens = "no")
     {
         if ($casesens == "no")
@@ -259,8 +260,9 @@ class urlreveal extends module
         preg_match("/$end/$ext", $text, $smatches, PREG_OFFSET_CAPTURE, $ss);
         $se = $smatches[0][1];
         return str_replace(array(strtolower("$start"), strtoupper("$start"), strtolower
-            ("$end"), strtoupper("$end"), "\r", "\n"), "", substr($text, $ss, $se - $ss));
+        ("$end"), strtoupper("$end"), "\r", "\n"), "", substr($text, $ss, $se - $ss));
     }
+
     function mksize($bytes)
     {
         if ($bytes < 1000 * 1024)
@@ -273,6 +275,7 @@ class urlreveal extends module
             return number_format($bytes / 1099511627776, 2) . " TB";
     }
 }
+
 /*
 Vers History:
 0.9.1:

@@ -46,75 +46,62 @@ define('OS', 'auto');
 
 //YOU SHOULD NOT HAVE TO EDIT BELOW THIS POINT UNLESS YOU SPECIFY "unknown" AS OS!
 
-if (OS == "auto")
-{
-	switch (PHP_OS)
-	{
-		case "Windows NT":
-			$OS = "windows";
-			break;
-		case "Linux":
-			$OS = "linux";
-			break;
-		case "FreeBSD":
-			$OS = "freebsd";
-			break;
-		case "Unix":
-			$OS = "unix";
-			break;
-		//Thx OrochiTux for below
-		case "Darwin":
-			$OS = "freebsd";
-			break;
-		default:
-			$OS = "windows";
-			break;
-	}
-}
-else
-{
-	$OS = OS;
+if (OS == "auto") {
+    switch (PHP_OS) {
+        case "Windows NT":
+            $OS = "windows";
+            break;
+        case "Linux":
+            $OS = "linux";
+            break;
+        case "FreeBSD":
+            $OS = "freebsd";
+            break;
+        case "Unix":
+            $OS = "unix";
+            break;
+        //Thx OrochiTux for below
+        case "Darwin":
+            $OS = "freebsd";
+            break;
+        default:
+            $OS = "windows";
+            break;
+    }
+} else {
+    $OS = OS;
 }
 
-if ($OS == 'unknown')
-{
-	define('EAGAIN', 		0); /* Try again */
-	define('EISCONN', 		0);	/* Transport endpoint is already connected */
-	define('EALREADY',		0);	/* Operation already in progress */
-	define('EINPROGRESS',	0);	/* Operation now in progress */
-}
-else if ($OS == 'windows')
-{
-	//http://developer.novell.com/support/winsock/doc/appenda.htm
-	define('EAGAIN', 		10035);	//EWOULDBLOCK.. kinda like EAGAIN in windows?
-	define('EISCONN', 		10056);	/* Transport endpoint is already connected */
-	define('EALREADY',		10037);	/* Operation already in progress */
-	define('EINPROGRESS',	10036);	/* Operation now in progress */
-}
-else if ($OS == 'freebsd')
-{
-	//Thanks to ryguy@efnet
-	///usr/include/errno.h (freebsd)
-	define('EAGAIN', 		35); 	/* Try again */
-	define('EISCONN', 		56); 	/* Transport endpoint is already connected */
-	define('EALREADY', 		37); 	/* Operation already in progress */
-	define('EINPROGRESS', 	36); 	/* Operation now in progress */
-}
-else if ($OS == 'linux')
-{
-	///usr/include/sys/errno.h (sparc)
-	define('EAGAIN', 		11);	/* Try again */
-	define('EISCONN', 		106);	/* Transport endpoint is already connected */
-	define('EALREADY',		114);	/* Operation already in progress */
-	define('EINPROGRESS',	115);	/* Operation now in progress */
-}
-else if ($OS == 'unix')
-{
-	///usr/include/asm/errno.h (mandrake 9.0)
-	define('EAGAIN', 		11);	/* Try again */
-	define('EISCONN', 		133);	/* Transport endpoint is already connected */
-	define('EALREADY',		149);	/* Operation already in progress */
-	define('EINPROGRESS',	150);	/* Operation now in progress */
+if ($OS == 'unknown') {
+    define('EAGAIN', 0); /* Try again */
+    define('EISCONN', 0);    /* Transport endpoint is already connected */
+    define('EALREADY', 0);    /* Operation already in progress */
+    define('EINPROGRESS', 0);    /* Operation now in progress */
+} else if ($OS == 'windows') {
+    //http://developer.novell.com/support/winsock/doc/appenda.htm
+    define('EAGAIN', 10035);    //EWOULDBLOCK.. kinda like EAGAIN in windows?
+    define('EISCONN', 10056);    /* Transport endpoint is already connected */
+    define('EALREADY', 10037);    /* Operation already in progress */
+    define('EINPROGRESS', 10036);    /* Operation now in progress */
+} else if ($OS == 'freebsd') {
+    //Thanks to ryguy@efnet
+    ///usr/include/errno.h (freebsd)
+    define('EAGAIN', 35);    /* Try again */
+    define('EISCONN', 56);    /* Transport endpoint is already connected */
+    define('EALREADY', 37);    /* Operation already in progress */
+    define('EINPROGRESS', 36);    /* Operation now in progress */
+} else if ($OS == 'linux') {
+    ///usr/include/sys/errno.h (sparc)
+    define('EAGAIN', 11);    /* Try again */
+    define('EISCONN', 106);    /* Transport endpoint is already connected */
+    define('EALREADY', 114);    /* Operation already in progress */
+    define('EINPROGRESS', 115);    /* Operation now in progress */
+} else if ($OS == 'unix') {
+    ///usr/include/asm/errno.h (mandrake 9.0)
+    define('EAGAIN', 11);    /* Try again */
+    define('EISCONN', 133);    /* Transport endpoint is already connected */
+    define('EALREADY', 149);    /* Operation already in progress */
+    define('EINPROGRESS', 150);    /* Operation now in progress */
 }
 
 // Version Definition
@@ -210,105 +197,112 @@ define('CONTAINS_MATCH', 3);
 
 //Used in socket class to keep track of sockets
 
-class socketInfo {
-	public $socket;
-	public $status;
-	public $readQueue;
-	public $readLength;
-	public $writeQueue;
-	public $writeLength;
-	public $host;
-	public $port;
-	public $newSockInt;
-	public $listener;
-	public $owner;
-	public $class;
-	public $func;
-	public $readScheduled; //Used so we don't add infinite queues to the process queue.
-	public $writeScheduled;
+class socketInfo
+{
+    public $socket;
+    public $status;
+    public $readQueue;
+    public $readLength;
+    public $writeQueue;
+    public $writeLength;
+    public $host;
+    public $port;
+    public $newSockInt;
+    public $listener;
+    public $owner;
+    public $class;
+    public $func;
+    public $readScheduled; //Used so we don't add infinite queues to the process queue.
+    public $writeScheduled;
 }
 
 //Channel and Username Linked List (Links) Definitions
 
-class channelLink {
-	public $name;
-	public $count;
-	public $memberList = array();
-	public $banList = array();
-	public $whoComplete;
-	public $banComplete;
-	public $modes;
-	public $created;
-	public $topic;
-	public $topicBy;
+class channelLink
+{
+    public $name;
+    public $count;
+    public $memberList = array();
+    public $banList = array();
+    public $whoComplete;
+    public $banComplete;
+    public $modes;
+    public $created;
+    public $topic;
+    public $topicBy;
 }
 
-class memberLink {
-	public $nick;
-	public $realNick;
-	public $host;
-	public $ident;
-	public $banned;
-	public $bantime;
-	public $status;
-	public $ignored;
+class memberLink
+{
+    public $nick;
+    public $realNick;
+    public $host;
+    public $ident;
+    public $banned;
+    public $bantime;
+    public $status;
+    public $ignored;
 }
 
 // Used in timer class
 
-class timer {
-	public $name;
-	public $class;
-	public $args;
-	public $interval;
-	public $lastTimeRun;
-	public $nextRunTime;
-	public $func;
+class timer
+{
+    public $name;
+    public $class;
+    public $args;
+    public $interval;
+    public $lastTimeRun;
+    public $nextRunTime;
+    public $func;
 }
 
-class usageLink {
-	public $isBanned;
-	public $timeBanned;
-	public $lastTimeUsed;
-	public $timesUsed;
+class usageLink
+{
+    public $isBanned;
+    public $timeBanned;
+    public $lastTimeUsed;
+    public $timesUsed;
 }
 
 
 // Useful for sending arguments with timers
 class argClass
 {
-	public $arg1;
-	public $arg2;
-	public $arg3;
-	public $arg4;
-	public $arg5;
-	public $arg6;
-	public $arg7;
-	public $arg8;
-	public $timer;
+    public $arg1;
+    public $arg2;
+    public $arg3;
+    public $arg4;
+    public $arg5;
+    public $arg6;
+    public $arg7;
+    public $arg8;
+    public $timer;
 }
 
 // Used to instantiate a bot
-class botClass {
-	public $timerClass;
-	public $ircClass;
-	public $dccClass;
-	public $parserClass;
-	public $socketClass;
-	public $configFilename;
-	public $db;
-	public $config;
+class botClass
+{
+    public $timerClass;
+    public $ircClass;
+    public $dccClass;
+    public $parserClass;
+    public $socketClass;
+    public $configFilename;
+    public $db;
+    public $config;
 }
 
 // Used with processQueue
-class queueItem {
-	public $owner; //IRC Class of owner
-	public $callBack_class;  //CALL BACK class/function to use
-	public $callBack_function;
-	public $nextRunTime; //The next getMicroTime() time to run
-	public $removed;
-	public $next;
-	public $prev;
+class queueItem
+{
+    public $owner; //IRC Class of owner
+    public $callBack_class;  //CALL BACK class/function to use
+    public $callBack_function;
+    public $nextRunTime; //The next getMicroTime() time to run
+    public $removed;
+    public $next;
+    public $prev;
 }
 
 ?>

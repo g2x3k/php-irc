@@ -1,4 +1,5 @@
 <?php
+
 /*
 +---------------------------------------------------------------------------
 |   PHP-IRC v2.2.0
@@ -35,200 +36,178 @@
 +---------------------------------------------------------------------------
 */
 
-class seen_mod extends module {
+class seen_mod extends module
+{
 
-	public $title = "Seen Mod";
-	public $author = "Manick";
-	public $version = "0.1";
-	
-	private $seen;
+    public $title = "Seen Mod";
+    public $author = "Manick";
+    public $version = "0.1";
 
-	public function init()
-	{
-		$this->timerClass->addTimer("seen_mod_updateini", $this, "seen_update", "", 60*15, false);
-		$this->seen = new ini("modules/seen/seen.ini");
-	}
+    private $seen;
 
-	public function destroy()
-	{
-		$this->timerClass->removeTimer("seen_mod_updateini");
-	}
+    public function init()
+    {
+        $this->timerClass->addTimer("seen_mod_updateini", $this, "seen_update", "", 60 * 15, false);
+        $this->seen = new ini("modules/seen/seen.ini");
+    }
 
-	// Write to file
-	public function seen_update($args)
-	{
-		if ($this->seen->getError())
-		{
-			return;
-		}
+    public function destroy()
+    {
+        $this->timerClass->removeTimer("seen_mod_updateini");
+    }
 
-		$this->seen->writeIni();
-		$this->dccClass->dccSend("Updated Seen Mod ini database file");
+    // Write to file
+    public function seen_update($args)
+    {
+        if ($this->seen->getError()) {
+            return;
+        }
 
-		return true;
-	}
+        $this->seen->writeIni();
+        $this->dccClass->dccSend("Updated Seen Mod ini database file");
 
-	// Update actions
-	public function seen($line, $args)
-	{
-		if ($this->seen->getError())
-		{
-			if (DEBUG == 1)
-			{
-				echo "Seen error!\n";
-			}
-			return;
-		}
+        return true;
+    }
 
-		if (strtolower($line['cmd']) == "join")
-		{
-			$line['text'] = "";
-		}
+    // Update actions
+    public function seen($line, $args)
+    {
+        if ($this->seen->getError()) {
+            if (DEBUG == 1) {
+                echo "Seen error!\n";
+            }
+            return;
+        }
 
-		if (strtolower($line['cmd']) == "kick")
-		{
-			$offsetA = strpos($line['params'], chr(32));
+        if (strtolower($line['cmd']) == "join") {
+            $line['text'] = "";
+        }
 
-			$act = "kick";
-			$user = substr($line['params'], $offsetA + 1);
-			
-			$this->addLast($user, $act, $line['text']);
+        if (strtolower($line['cmd']) == "kick") {
+            $offsetA = strpos($line['params'], chr(32));
 
-		}
-		else
-		{
-			$this->addLast($line['fromNick'], strtolower($line['cmd']), $line['text']);
-		}
-		
-		$this->getLast($line['fromNick']);
-	}
+            $act = "kick";
+            $user = substr($line['params'], $offsetA + 1);
 
-	private function getLast($user)
-	{
-		$user = irc::myStrToLower($user);
+            $this->addLast($user, $act, $line['text']);
 
-		if (!$this->seen->sectionExists("seen"))
-		{
-			return;
-		}
+        } else {
+            $this->addLast($line['fromNick'], strtolower($line['cmd']), $line['text']);
+        }
 
-		$var = $this->seen->getIniVal("seen", $user);
+        $this->getLast($line['fromNick']);
+    }
 
-		if ($var == false)
-		{
-			return false;
-		}
+    private function getLast($user)
+    {
+        $user = irc::myStrToLower($user);
 
-		$offsetA = strpos($var, "=");
-		$offsetB = strpos($var, "=", $offsetA + 1);
-		$offsetC = strpos($var, "=", $offsetB + 1);
+        if (!$this->seen->sectionExists("seen")) {
+            return;
+        }
 
-		$info = array();
+        $var = $this->seen->getIniVal("seen", $user);
 
-		$info['user'] = substr($var, 0, $offsetA);
-		$info['time'] = substr($var, $offsetA + 1, $offsetB - $offsetA - 1);
-		$info['act'] = substr($var, $offsetB + 1, $offsetC - $offsetB - 1);
-		$info['txt'] = substr($var, $offsetC + 1);
-		
-		return $info;
-	}
+        if ($var == false) {
+            return false;
+        }
 
-	private function addLast($user, $act, $txt)
-	{
-		$Suser = irc::myStrToLower($user);
+        $offsetA = strpos($var, "=");
+        $offsetB = strpos($var, "=", $offsetA + 1);
+        $offsetC = strpos($var, "=", $offsetB + 1);
 
-		$tAction = $user . "=" . time() . "=" . irc::myStrToLower($act) . "=" . $txt;
-		$this->seen->setIniVal("seen", $Suser, $tAction);
-	}
+        $info = array();
 
-	// User interface
-	public function priv_seen($line, $args)
-	{
-		if ($this->seen->getError())
-		{
-			$this->ircClass->notice($line['fromNick'], "There was an error while attempting to access the seen database.");
-			return;
-		}
+        $info['user'] = substr($var, 0, $offsetA);
+        $info['time'] = substr($var, $offsetA + 1, $offsetB - $offsetA - 1);
+        $info['act'] = substr($var, $offsetB + 1, $offsetC - $offsetB - 1);
+        $info['txt'] = substr($var, $offsetC + 1);
 
-		if ($line['to'] == $this->ircClass->getNick())
-		{
-			return;
-		}
+        return $info;
+    }
 
-		if ($args['nargs'] <= 0)
-		{
-			$this->ircClass->notice($line['fromNick'], "Usage: !seen <nick>");
-			return;
-		}
+    private function addLast($user, $act, $txt)
+    {
+        $Suser = irc::myStrToLower($user);
 
-		$user = irc::myStrToLower($args['arg1']);
+        $tAction = $user . "=" . time() . "=" . irc::myStrToLower($act) . "=" . $txt;
+        $this->seen->setIniVal("seen", $Suser, $tAction);
+    }
 
-		if ($user == irc::myStrToLower($line['fromNick']))
-		{
-			$this->ircClass->privMsg($line['to'], $line['fromNick'] . ", umm...  O..kay...");
-			$this->ircClass->action($line['to'], "points at " . $line['fromNick'] . "...");
-			return;
-		}
+    // User interface
+    public function priv_seen($line, $args)
+    {
+        if ($this->seen->getError()) {
+            $this->ircClass->notice($line['fromNick'], "There was an error while attempting to access the seen database.");
+            return;
+        }
 
-		$data = $this->getLast($user);
+        if ($line['to'] == $this->ircClass->getNick()) {
+            return;
+        }
 
-		if ($data === false)
-		{
-			$this->ircClass->privMsg($line['to'], $line['fromNick'] . ", I have never seen " . $args['arg1'] . " before.");
-			return;
-		}
+        if ($args['nargs'] <= 0) {
+            $this->ircClass->notice($line['fromNick'], "Usage: !seen <nick>");
+            return;
+        }
 
-		$time = time() - $data['time'];
-		
-		if ($time > 3600*24)
-		{
-			$timeString = irc::timeFormat($time, "%d days %h hours %m min %s sec");
-		}
-		else if ($time > 3600)
-		{
-			$timeString = irc::timeFormat($time, "%h hours %m min %s sec");
-		}
-		else if ($time > 60)
-		{
-			$timeString = irc::timeFormat($time, "%m min %s sec");
-		}
-		else
-		{
-			$timeString = irc::timeFormat($time, "%s sec");
-		}
+        $user = irc::myStrToLower($args['arg1']);
 
-		$action = "";
+        if ($user == irc::myStrToLower($line['fromNick'])) {
+            $this->ircClass->privMsg($line['to'], $line['fromNick'] . ", umm...  O..kay...");
+            $this->ircClass->action($line['to'], "points at " . $line['fromNick'] . "...");
+            return;
+        }
 
-		switch ($data['act'])
-		{
-			case "privmsg":
-				$action = "saying in a channel";
-				break;
-			case "notice":
-				$action = "noticing a channel";
-				break;
-			case "join":
-				$action = "joining a channel";
-				break;
-			case "kick":
-				$action = "being kicked from a channel";
-				break;
-			case "part":
-				$action = "parting a channel";
-				break;
-			case "quit":
-				$action = "quitting";
-				break;
-		}
+        $data = $this->getLast($user);
 
-		if ($data['txt'] != "")
-		{
-			$action .= ": " . $data['txt'];
-		}
+        if ($data === false) {
+            $this->ircClass->privMsg($line['to'], $line['fromNick'] . ", I have never seen " . $args['arg1'] . " before.");
+            return;
+        }
 
-		$this->ircClass->privMsg($line['to'], $line['fromNick'] . ", I last saw " . $data['user'] . " " . $timeString . " ago " . $action . ".");
+        $time = time() - $data['time'];
 
-	}
+        if ($time > 3600 * 24) {
+            $timeString = irc::timeFormat($time, "%d days %h hours %m min %s sec");
+        } else if ($time > 3600) {
+            $timeString = irc::timeFormat($time, "%h hours %m min %s sec");
+        } else if ($time > 60) {
+            $timeString = irc::timeFormat($time, "%m min %s sec");
+        } else {
+            $timeString = irc::timeFormat($time, "%s sec");
+        }
+
+        $action = "";
+
+        switch ($data['act']) {
+            case "privmsg":
+                $action = "saying in a channel";
+                break;
+            case "notice":
+                $action = "noticing a channel";
+                break;
+            case "join":
+                $action = "joining a channel";
+                break;
+            case "kick":
+                $action = "being kicked from a channel";
+                break;
+            case "part":
+                $action = "parting a channel";
+                break;
+            case "quit":
+                $action = "quitting";
+                break;
+        }
+
+        if ($data['txt'] != "") {
+            $action .= ": " . $data['txt'];
+        }
+
+        $this->ircClass->privMsg($line['to'], $line['fromNick'] . ", I last saw " . $data['user'] . " " . $timeString . " ago " . $action . ".");
+
+    }
 }
 
 ?>

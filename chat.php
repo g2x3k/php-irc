@@ -1,4 +1,5 @@
 <?php
+
 /*
 +---------------------------------------------------------------------------
 |   PHP-IRC v2.2.1 Service Release
@@ -34,329 +35,298 @@
 +---------------------------------------------------------------------------
 */
 
-class chat {
+class chat
+{
 
-  /* Chat specific Data */
-  	public $id;
-	public $status;
-	public $sockInt;
-	public $isAdmin;
-	public $timeConnected;
-	public $verified;
-	public $readQueue;
-	public $floodQueue;
-	public $floodQueueTime;
-	public $port;
-	public $type;
-	public $nick;
-	public $timeOutLevel;
-	public $removed;
-	public $connection;
+    /* Chat specific Data */
+    public $id;
+    public $status;
+    public $sockInt;
+    public $isAdmin;
+    public $timeConnected;
+    public $verified;
+    public $readQueue;
+    public $floodQueue;
+    public $floodQueueTime;
+    public $port;
+    public $type;
+    public $nick;
+    public $timeOutLevel;
+    public $removed;
+    public $connection;
 
-	public $handShakeSent;
-	public $handShakeTime;
-	public $reverse;
-	public $connectHost;
+    public $handShakeSent;
+    public $handShakeTime;
+    public $reverse;
+    public $connectHost;
 
-  /* Classes */
-  	private $dccClass;
-	private $parserClass;
-	private $ircClass;
-	private $socketClass;
-	private $timerClass;
+    /* Classes */
+    private $dccClass;
+    private $parserClass;
+    private $ircClass;
+    private $socketClass;
+    private $timerClass;
 
-	//class handler
-	private $handler;
+    //class handler
+    private $handler;
 
-	/* Constructor */
-	public function __construct($id, $nick, $admin, $sockInt, $host, $port, $handler, $reverse)
-	{
-		$this->id = $id;
-		$this->handler = $handler;
-		$this->nick = $nick;
-		$this->isAdmin = $admin;
-		$this->sockInt = $sockInt;
-		$this->port = $port;
-		$this->connectHost = $host;
-		$this->reverse = $reverse;
-		$this->handShakeSent = false;
-
-		$this->sendQueue = array();
-		$this->sendQueueCount = 0;
-	}
-
-	public function setIrcClass($class)
-	{
-		$this->ircClass = $class;
-	}
-
-	public function setDccClass($class)
-	{
-		$this->dccClass = $class;
-	}
-	
-	public function setSocketClass($class)
-	{
-		$this->socketClass = $class;
-	}
-
-	public function setParserClass($class)
-	{
-		$this->parserClass = $class;
-	}
-
-	public function setTimerClass($class)
-	{
-		$this->timerClass = $class;
-	}
-
-	private function sendUserGreeting()
+    /* Constructor */
+    public function __construct($id, $nick, $admin, $sockInt, $host, $port, $handler, $reverse)
     {
-        if ($this->verified == true)
-        {
-                return;
+        $this->id = $id;
+        $this->handler = $handler;
+        $this->nick = $nick;
+        $this->isAdmin = $admin;
+        $this->sockInt = $sockInt;
+        $this->port = $port;
+        $this->connectHost = $host;
+        $this->reverse = $reverse;
+        $this->handShakeSent = false;
+
+        $this->sendQueue = array();
+        $this->sendQueueCount = 0;
+    }
+
+    public function setIrcClass($class)
+    {
+        $this->ircClass = $class;
+    }
+
+    public function setDccClass($class)
+    {
+        $this->dccClass = $class;
+    }
+
+    public function setSocketClass($class)
+    {
+        $this->socketClass = $class;
+    }
+
+    public function setParserClass($class)
+    {
+        $this->parserClass = $class;
+    }
+
+    public function setTimerClass($class)
+    {
+        $this->timerClass = $class;
+    }
+
+    private function sendUserGreeting()
+    {
+        if ($this->verified == true) {
+            return;
         }
 
         $this->dccSend("Welcome to " . $this->ircClass->getNick());
-        $this->dccSend("PHP-iRC v". VERSION ." [". VERSION_DATE ."]");
+        $this->dccSend("PHP-iRC v" . VERSION . " [" . VERSION_DATE . "]");
         $time = $this->ircClass->timeFormat($this->ircClass->getRunTime(), "%d days, %h hrs, %m min, %s sec");
         $this->dccSend("running " . $time);
         $this->dccSend("You are currently in the dcc chat interface. Type 'help' to begin.");
-	}
+    }
 
- 	private function sendAdminGreeting()
-	{
-		if ($this->verified == true)
-		{
-			return;
-		}
+    private function sendAdminGreeting()
+    {
+        if ($this->verified == true) {
+            return;
+        }
 
-		$this->dccSend("Welcome to " . $this->ircClass->getNick());
-		$this->dccSend("PHP-iRC v". VERSION ." [". VERSION_DATE ."]");
-		$time = $this->ircClass->timeFormat($this->ircClass->getRunTime(), "%d days, %h hrs, %m min, %s sec");
-		$this->dccSend("running " . $time);
-		$this->dccSend("Enter Your Password:");
-	}
-	
-	public function dccSend($data, $to = null)
-	{
-		if ($this->status != DCC_CONNECTED)
-		{
-			return;
-		}
+        $this->dccSend("Welcome to " . $this->ircClass->getNick());
+        $this->dccSend("PHP-iRC v" . VERSION . " [" . VERSION_DATE . "]");
+        $time = $this->ircClass->timeFormat($this->ircClass->getRunTime(), "%d days, %h hrs, %m min, %s sec");
+        $this->dccSend("running " . $time);
+        $this->dccSend("Enter Your Password:");
+    }
 
-		if ($to == null)
-		{
-			$to = $this;
-		}
+    public function dccSend($data, $to = null)
+    {
+        if ($this->status != DCC_CONNECTED) {
+            return;
+        }
 
-		$this->dccClass->dccSend($to, "--> " . $data . "\n");
-	}
+        if ($to == null) {
+            $to = $this;
+        }
 
-	public function dccSendRaw($data, $to = null)
-	{
-		if ($this->status != DCC_CONNECTED)
-		{
-			return;
-		}
+        $this->dccClass->dccSend($to, "--> " . $data . "\n");
+    }
 
-		if ($to == null)
-		{
-			$to = $this;
-		}
+    public function dccSendRaw($data, $to = null)
+    {
+        if ($this->status != DCC_CONNECTED) {
+            return;
+        }
 
-		$this->dccClass->dccSend($to, $data);
-	}
+        if ($to == null) {
+            $to = $this;
+        }
+
+        $this->dccClass->dccSend($to, $data);
+    }
 
 
-	public function disconnect($msg = "")
-	{
+    public function disconnect($msg = "")
+    {
 
-		$msg = str_replace("\r", "", $msg);
-		$msg = str_replace("\n", "", $msg);
+        $msg = str_replace("\r", "", $msg);
+        $msg = str_replace("\n", "", $msg);
 
-		if (is_object($this->handler) && $this->status == DCC_CONNECTED)
-		{
-			$this->handler->disconnected($this);
-		}
+        if (is_object($this->handler) && $this->status == DCC_CONNECTED) {
+            $this->handler->disconnected($this);
+        }
 
-		$this->status = false;
+        $this->status = false;
 
-		if ($msg != "")
-		{
-			$this->dccClass->dccInform("DCC: " . $this->nick . " closed DCC Chat (" . $msg . ")", $this);
-			$this->ircClass->notice($this->nick, "DCC session ended: " . $msg, 1);
-		}
-		else
-		{
-			$this->dccClass->dccInform("DCC: " . $this->nick . " closed DCC Chat", $this);
-		}
+        if ($msg != "") {
+            $this->dccClass->dccInform("DCC: " . $this->nick . " closed DCC Chat (" . $msg . ")", $this);
+            $this->ircClass->notice($this->nick, "DCC session ended: " . $msg, 1);
+        } else {
+            $this->dccClass->dccInform("DCC: " . $this->nick . " closed DCC Chat", $this);
+        }
 
-	  	$this->dccClass->disconnect($this);
+        $this->dccClass->disconnect($this);
 
-	  	$this->connection = null;
+        $this->connection = null;
 
-		return true;
-	}
+        return true;
+    }
 
 
+    private function doHandShake()
+    {
+        $this->dccSendRaw("100 " . $this->ircClass->getNick() . "\n");
+        $this->handShakeSent = true;
+        $this->timerClass->addTimer(irc::randomHash(), $this, "handShakeTimeout", "", 8);
+    }
 
-	private function doHandShake()
-	{
-		$this->dccSendRaw("100 ".$this->ircClass->getNick()."\n");
-		$this->handShakeSent = true;
-		$this->timerClass->addTimer(irc::randomHash(), $this, "handShakeTimeout", "", 8);
-	}
+    private function processHandShake()
+    {
+        if ($this->readQueue == "") {
+            return;
+        }
 
-	private function processHandShake()
-	{
-		if ($this->readQueue == "")
-		{
-			return;
-		}
+        $response = $this->readQueue;
+        $this->readQueue = "";
+        $responseArray = explode(chr(32), $response);
+        if ($responseArray[0] == "101") {
+            $this->reverse = false;
+            $this->onConnect($this->connection);
+            return;
+        }
 
-		$response = $this->readQueue;
-		$this->readQueue = "";
-		$responseArray = explode(chr(32), $response);
-		if ($responseArray[0] == "101")
-		{
-			$this->reverse = false;
-			$this->onConnect($this->connection);
-			return;
-		}
+        $this->disconnect("DCC Client Server reported error on attempt to start chat");
+    }
 
-		$this->disconnect("DCC Client Server reported error on attempt to start chat");
-	}
+    public function handShakeTimeout()
+    {
+        if ($this->status != false) {
+            if ($this->reverse == true) {
+                $this->disconnect("DCC Reverse handshake timed out");
+            }
+        }
+        return false;
+    }
 
-	public function handShakeTimeout()
-	{
-		if ($this->status != false)
-		{
-			if ($this->reverse == true)
-			{
-				$this->disconnect("DCC Reverse handshake timed out");
-			}
-		}
-		return false;
-	}
+    /* Main events */
+    public function onTimeout($conn)
+    {
+        $this->disconnect("Connection transfer timed out");
+    }
 
-	/* Main events */
-	public function onTimeout($conn)
-	{
-		$this->disconnect("Connection transfer timed out");
-	}
+    public function onDead($conn)
+    {
+        $this->disconnect($this->connection->getErrorMsg());
+    }
 
-	public function onDead($conn)
-	{
-		$this->disconnect($this->connection->getErrorMsg());
-	}
+    public function onRead($conn)
+    {
+        if ($this->socketClass->hasLine($this->sockInt)) {
+            $this->readQueue .= $this->socketClass->getQueueLine($this->sockInt);
+        }
 
-	public function onRead($conn)
-	{
-		if ($this->socketClass->hasLine($this->sockInt))
-		{
-			$this->readQueue .= $this->socketClass->getQueueLine($this->sockInt);
-		}
+        if ($this->status == DCC_CONNECTED) {
+            if ($this->reverse != false) {
+                if ($this->handShakeSent != false) {
+                    $this->processHandShake();
+                }
+            } else {
+                if ($this->readQueue != "") {
+                    $this->parserClass->parseDcc($this, $this->handler);
+                }
+            }
 
-		if ($this->status == DCC_CONNECTED)
-		{
-			if ($this->reverse != false)
-			{
-				if ($this->handShakeSent != false)
-				{
-					$this->processHandShake();
-				}
-			}
-			else
-			{
-				if ($this->readQueue != "")
-				{
-					$this->parserClass->parseDcc($this, $this->handler);
-				}
-			}
+        }
 
-		}
-		
-		if ($this->socketClass->hasLine($this->sockInt))
-		{
-			return true;
-		}
-	}
+        if ($this->socketClass->hasLine($this->sockInt)) {
+            return true;
+        }
+    }
 
-	public function onWrite($conn)
-	{
-		//do nothing
-	}
+    public function onWrite($conn)
+    {
+        //do nothing
+    }
 
-	public function onAccept($oldConn, $newConn)
-	{
-		$this->dccClass->accepted($oldConn, $newConn);
-		$this->connection = $newConn;
-		$oldConn->disconnect();
-		$this->sockInt = $newConn->getSockInt();
-		$this->onConnect($newConn);
-	}
+    public function onAccept($oldConn, $newConn)
+    {
+        $this->dccClass->accepted($oldConn, $newConn);
+        $this->connection = $newConn;
+        $oldConn->disconnect();
+        $this->sockInt = $newConn->getSockInt();
+        $this->onConnect($newConn);
+    }
 
-	public function onConnectTimeout($conn)
-	{
-		$this->disconnect("Connection attempt timed out");
-	}
+    public function onConnectTimeout($conn)
+    {
+        $this->disconnect("Connection attempt timed out");
+    }
 
-	public function onConnect($conn)
-	{
-		$this->status = DCC_CONNECTED;
+    public function onConnect($conn)
+    {
+        $this->status = DCC_CONNECTED;
 
-		if ($this->reverse != false)
-		{
-			$this->dccClass->dccInform("DCC CHAT: " . $this->nick . " handling dcc server request");
-			$this->doHandShake();
-			return;
-		}
+        if ($this->reverse != false) {
+            $this->dccClass->dccInform("DCC CHAT: " . $this->nick . " handling dcc server request");
+            $this->doHandShake();
+            return;
+        }
 
-		$this->dccClass->dccInform("DCC CHAT: " . $this->nick . " connection established");
+        $this->dccClass->dccInform("DCC CHAT: " . $this->nick . " connection established");
 
-		if ($this->handler === false || $this->handler == null)
-		{
-			if ($this->isAdmin == true)
-			{
-				$this->sendAdminGreeting();
-			}
-			else
-			{
-				$this->sendUserGreeting();
-			}
-		}
-		else
-		{
-		
-			if (is_object($this->handler))
-			{
-				$this->handler->connected($this);
-			}
-		}
+        if ($this->handler === false || $this->handler == null) {
+            if ($this->isAdmin == true) {
+                $this->sendAdminGreeting();
+            } else {
+                $this->sendUserGreeting();
+            }
+        } else {
 
-	}
+            if (is_object($this->handler)) {
+                $this->handler->connected($this);
+            }
+        }
+
+    }
 
 
-	public function initialize()
-	{
+    public function initialize()
+    {
 
-		$this->dccClass->dccInform("DCC: " . $this->nick . " is attempting to login");
+        $this->dccClass->dccInform("DCC: " . $this->nick . " is attempting to login");
 
-		if ($this->status == DCC_LISTENING)
-		{
-			$this->ircClass->privMsg($this->nick, "\1DCC CHAT chat " . $this->ircClass->getClientIP(1) . " " . $this->port . "\1", 0);
-			$this->ircClass->notice($this->nick, "DCC Chat (" . $this->ircClass->getClientIP(0) . ")", 0);
-		}
+        if ($this->status == DCC_LISTENING) {
+            $this->ircClass->privMsg($this->nick, "\1DCC CHAT chat " . $this->ircClass->getClientIP(1) . " " . $this->port . "\1", 0);
+            $this->ircClass->notice($this->nick, "DCC Chat (" . $this->ircClass->getClientIP(0) . ")", 0);
+        }
 
-		$this->timeConnected = time();
-		$this->timeOutLevel = 0;
-		$this->verified = 0;
-		$this->readQueue = "";
-		$this->floodQueue = "";
-		$this->floodQueueTime = 0;
-		$this->type = CHAT;
-	}
+        $this->timeConnected = time();
+        $this->timeOutLevel = 0;
+        $this->verified = 0;
+        $this->readQueue = "";
+        $this->floodQueue = "";
+        $this->floodQueueTime = 0;
+        $this->type = CHAT;
+    }
 
 
 }

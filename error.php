@@ -1,4 +1,5 @@
 <?php
+
 /*
 +---------------------------------------------------------------------------
 |   PHP-IRC v2.2.1 Service Release
@@ -35,73 +36,75 @@
 +---------------------------------------------------------------------------
 */
 
-class ConnectException extends Exception {
- 	
- 	private $exceptionTime = 0;
+class ConnectException extends Exception
+{
 
-	function __construct($message)
-	{
-		parent::__construct($message);
-		$this->exceptionTime = time();
-	}
+    private $exceptionTime = 0;
 
-	function getTime()
-	{
-		return $this->exceptionTime;
-	}
+    function __construct($message)
+    {
+        parent::__construct($message);
+        $this->exceptionTime = time();
+    }
+
+    function getTime()
+    {
+        return $this->exceptionTime;
+    }
 }
 
 
-class SendDataException extends Exception {
- 	
- 	private $exceptionTime = 0;
+class SendDataException extends Exception
+{
 
-	function __construct($message)
-	{
-		parent::__construct($message);
-		$this->exceptionTime = time();
-	}
+    private $exceptionTime = 0;
 
-	function getTime()
-	{
-		return $this->exceptionTime;
-	}
+    function __construct($message)
+    {
+        parent::__construct($message);
+        $this->exceptionTime = time();
+    }
+
+    function getTime()
+    {
+        return $this->exceptionTime;
+    }
 }
 
 
+class ConnectionTimeout extends Exception
+{
 
-class ConnectionTimeout extends Exception {
+    private $exceptionTime = 0;
 
- 	private $exceptionTime = 0;
+    function __construct($message)
+    {
+        parent::__construct($message);
+        $this->exceptionTime = time();
+    }
 
-	function __construct($message)
-	{
-		parent::__construct($message);
-		$this->exceptionTime = time();
-	}
-
-	function getTime()
-	{
-		return $this->exceptionTime;
-	}
+    function getTime()
+    {
+        return $this->exceptionTime;
+    }
 }
 
 
+class ReadException extends Exception
+{
 
-class ReadException extends Exception {
+    private $exceptionTime = 0;
 
- 	private $exceptionTime = 0;
+    function __construct($message)
+    {
+        parent::__construct($message);
+        $this->exceptionTime = time();
+    }
 
-	function __construct($message)
-	{
-		parent::__construct($message);
-		$this->exceptionTime = time();
-	}
-
-	function getTime()
-	{
-		return $this->exceptionTime;
-	}
+    function getTime()
+    {
+        return $this->exceptionTime;
+    }
 }
 
 ?>

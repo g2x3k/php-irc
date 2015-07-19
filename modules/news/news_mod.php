@@ -1,4 +1,5 @@
 <?php
+
 /*
 +---------------------------------------------------------------------------
 |   PHP-IRC v2.2.0
@@ -35,307 +36,260 @@
 +---------------------------------------------------------------------------
 */
 
-class news_mod extends module {
+class news_mod extends module
+{
 
-	public $title = "News Mod";
-	public $author = "Manick";
-	public $version = "0.1b";
+    public $title = "News Mod";
+    public $author = "Manick";
+    public $version = "0.1b";
 
-	private $news = array();
-	private $highest;
+    private $news = array();
+    private $highest;
 
-	public function priv_news($line, $args)
-	{
-		if ($line['to'] == $this->ircClass->getNick())
-		{
-			return;
-		}
+    public function priv_news($line, $args)
+    {
+        if ($line['to'] == $this->ircClass->getNick()) {
+            return;
+        }
 
-		$cmd = substr($args['cmd'], 1);
+        $cmd = substr($args['cmd'], 1);
 
-		if (!isset($this->news[$cmd]))
-		{
-			$this->news[$cmd] = new ini("modules/news/". $cmd .".ini");
-		}
+        if (!isset($this->news[$cmd])) {
+            $this->news[$cmd] = new ini("modules/news/" . $cmd . ".ini");
+        }
 
-		if ($this->news[$cmd]->getError())
-		{
-			return;
-		}
-		
-		$args['cmd'] = $cmd;
+        if ($this->news[$cmd]->getError()) {
+            return;
+        }
 
-		if ($args['nargs'] == 0)
-		{
-			$this->nocmds($line, $args);
-		}
-		else
-		{
-			$this->cmds($line, $args);
-		}
-	}
+        $args['cmd'] = $cmd;
 
-	private function nocmds($line, $args)
-	{
-		$chan = irc::myStrToLower($line['to']);
+        if ($args['nargs'] == 0) {
+            $this->nocmds($line, $args);
+        } else {
+            $this->cmds($line, $args);
+        }
+    }
 
-		if (!$this->news[$args['cmd']]->sectionExists($chan))
-		{
-			$this->ircClass->notice($line['fromNick'], "There are no news items for this channel.");
-			return;
-		}
+    private function nocmds($line, $args)
+    {
+        $chan = irc::myStrToLower($line['to']);
 
-		$news = $this->news[$args['cmd']]->getSection($chan);
-		ksort($news);
+        if (!$this->news[$args['cmd']]->sectionExists($chan)) {
+            $this->ircClass->notice($line['fromNick'], "There are no news items for this channel.");
+            return;
+        }
 
-		$this->ircClass->notice($line['fromNick'], "Current News Items:");
+        $news = $this->news[$args['cmd']]->getSection($chan);
+        ksort($news);
 
-		foreach ($news AS $index => $item)
-		{
-			if ($index != "highest")
-			{
-				$this->ircClass->notice($line['fromNick'], $item);
-			}
-		}
-	}
+        $this->ircClass->notice($line['fromNick'], "Current News Items:");
 
-	private function cmds($line, $args)
-	{
-		$cmd = $args['arg1'];
+        foreach ($news AS $index => $item) {
+            if ($index != "highest") {
+                $this->ircClass->notice($line['fromNick'], $item);
+            }
+        }
+    }
 
-		switch($cmd)
-		{
-			case "add":
-				$this->news_add($line, $args);
-				break;
-			case "count":
-				$this->news_count($line, $args);
-				break;
-			case "del":
-				$this->news_del($line, $args);
-				break;
-			case "show":
-				$this->news_show($line, $args);
-				break;
-			case "clear":
-				$this->news_clear($line, $args);
-				break;
-			default:
-				$this->ircClass->notice($line['fromNick'], "I did not understand your query!  Try again!");
-				break;
-		}
-	}
-	
-	private function news_count($line, $args)
-	{
-		$chan = irc::myStrToLower($line['to']);
-		$nick = irc::myStrToLower($line['fromNick']);
-		
-		if (!$this->ircClass->hasModeSet($chan, $nick, "oa"))
-		{
-			return;
-		}
+    private function cmds($line, $args)
+    {
+        $cmd = $args['arg1'];
 
-		if (!$this->news[$args['cmd']]->sectionExists($chan))
-		{
-			$this->ircClass->notice($line['fromNick'], "There are no news items for this channel.");
-			return;
-		}
-		
-		$num = $this->news[$args['cmd']]->numVars($chan);
-		
-		$this->ircClass->notice($line['fromNick'], "There are " . $num . " items for this channel.");
-	}
+        switch ($cmd) {
+            case "add":
+                $this->news_add($line, $args);
+                break;
+            case "count":
+                $this->news_count($line, $args);
+                break;
+            case "del":
+                $this->news_del($line, $args);
+                break;
+            case "show":
+                $this->news_show($line, $args);
+                break;
+            case "clear":
+                $this->news_clear($line, $args);
+                break;
+            default:
+                $this->ircClass->notice($line['fromNick'], "I did not understand your query!  Try again!");
+                break;
+        }
+    }
 
-	private function news_show($line, $args)
-	{
-		$chan = irc::myStrToLower($line['to']);
-		$nick = irc::myStrToLower($line['fromNick']);
+    private function news_count($line, $args)
+    {
+        $chan = irc::myStrToLower($line['to']);
+        $nick = irc::myStrToLower($line['fromNick']);
 
-		if (!$this->ircClass->hasModeSet($chan, $nick, "oa"))
-		{
-			return;
-		}
+        if (!$this->ircClass->hasModeSet($chan, $nick, "oa")) {
+            return;
+        }
 
-		if (!$this->news[$args['cmd']]->sectionExists($chan))
-		{
-			$this->ircClass->notice($line['fromNick'], "There are no news items for this channel.");
-			return;
-		}
+        if (!$this->news[$args['cmd']]->sectionExists($chan)) {
+            $this->ircClass->notice($line['fromNick'], "There are no news items for this channel.");
+            return;
+        }
 
-		$news = $this->news[$args['cmd']]->getSection($chan);
-		ksort($news);
+        $num = $this->news[$args['cmd']]->numVars($chan);
 
-		$this->ircClass->notice($line['fromNick'], "Current News Items:");
+        $this->ircClass->notice($line['fromNick'], "There are " . $num . " items for this channel.");
+    }
 
-		foreach ($news AS $index => $item)
-		{
-			if ($index != "highest")
-			{
-				$this->ircClass->notice($line['fromNick'], $index . ") " . $item);
-			}
-		}
-	}
+    private function news_show($line, $args)
+    {
+        $chan = irc::myStrToLower($line['to']);
+        $nick = irc::myStrToLower($line['fromNick']);
 
-	private function news_del($line, $args)
-	{
-		$chan = irc::myStrToLower($line['to']);
-		$nick = irc::myStrToLower($line['fromNick']);
+        if (!$this->ircClass->hasModeSet($chan, $nick, "oa")) {
+            return;
+        }
 
-		if (!$this->ircClass->hasModeSet($chan, $nick, "oa"))
-		{
-			return;
-		}
+        if (!$this->news[$args['cmd']]->sectionExists($chan)) {
+            $this->ircClass->notice($line['fromNick'], "There are no news items for this channel.");
+            return;
+        }
 
-		if ($args['nargs'] > 1)
-		{
-			$highest = $this->news[$args['cmd']]->getIniVal($chan, "highest");
-			if ($highest == false)
-			{
-				$highest = 0;
-			}
+        $news = $this->news[$args['cmd']]->getSection($chan);
+        ksort($news);
 
-			$arg2 = $args['arg2'];
-			$arg2low = strtolower($arg2);
+        $this->ircClass->notice($line['fromNick'], "Current News Items:");
 
-			if ($arg2low == "low")
-			{
-				$vals = $this->news[$args['cmd']]->getSection($chan);
-				unset($vals['highest']);
-				$keys = array_keys($vals);
-				ksort($keys);
-				$arg2 = $keys[0];
-			}
-			else if ($arg2low == "high")
-			{
-				$arg2 = $highest;
-			}
+        foreach ($news AS $index => $item) {
+            if ($index != "highest") {
+                $this->ircClass->notice($line['fromNick'], $index . ") " . $item);
+            }
+        }
+    }
 
-			$arg2intval = intval($arg2);
+    private function news_del($line, $args)
+    {
+        $chan = irc::myStrToLower($line['to']);
+        $nick = irc::myStrToLower($line['fromNick']);
 
-			if ($arg2intval == 0)
-			{
-				$this->ircClass->notice($line['fromNick'], "Error, you specified an invalid line number.");
-			}
-			else
-			{
-				$var = $this->news[$args['cmd']]->getIniVal($chan, $arg2);
+        if (!$this->ircClass->hasModeSet($chan, $nick, "oa")) {
+            return;
+        }
 
-				if ($var === false)
-				{
-					$this->ircClass->notice($line['fromNick'], "That line contains no information.");
-				}
-				else
-				{
+        if ($args['nargs'] > 1) {
+            $highest = $this->news[$args['cmd']]->getIniVal($chan, "highest");
+            if ($highest == false) {
+                $highest = 0;
+            }
 
-					$this->news[$args['cmd']]->deleteVar($chan, $arg2);
-					
-					if ($arg2intval == $highest)
-					{
-						$vals = $this->news[$args['cmd']]->getSection($chan);
-						$keys = array_keys($vals);
-						ksort($keys);
-						$highest = $keys[count($keys)-1];
-						$this->news[$args['cmd']]->setIniVal($chan, "highest", $highest);
-					}
+            $arg2 = $args['arg2'];
+            $arg2low = strtolower($arg2);
 
-					$this->news[$args['cmd']]->writeIni();
-					$this->ircClass->notice($line['fromNick'], "The line was successfully deleted.");
-				}
-			}
-		}
-		else
-		{
-			$this->ircClass->notice($line['fromNick'], "Error, you must specify a line number to delete.  Use !news show to see line numbers");
-		}
-	}
+            if ($arg2low == "low") {
+                $vals = $this->news[$args['cmd']]->getSection($chan);
+                unset($vals['highest']);
+                $keys = array_keys($vals);
+                ksort($keys);
+                $arg2 = $keys[0];
+            } else if ($arg2low == "high") {
+                $arg2 = $highest;
+            }
 
-	private function news_add($line, $args)
-	{
-		$chan = irc::myStrToLower($line['to']);
-		$nick = irc::myStrToLower($line['fromNick']);
+            $arg2intval = intval($arg2);
 
-		if (!$this->ircClass->hasModeSet($chan, $nick, "oa"))
-		{
-			return;
-		}
+            if ($arg2intval == 0) {
+                $this->ircClass->notice($line['fromNick'], "Error, you specified an invalid line number.");
+            } else {
+                $var = $this->news[$args['cmd']]->getIniVal($chan, $arg2);
 
-		if ($this->news[$args['cmd']]->sectionExists($chan))
-		{
-			$next = intval($this->news[$args['cmd']]->getIniVal($chan, "highest")) + 1;
-		}
-		else
-		{
-			$next = 0 + 1;
-		}
-		
-		if ($args['nargs'] > 1)
-		{
-			$arg2 = $args['arg2'];
-			$arg2intval = intval($arg2);
-			
-			echo $arg2 . "-" . $arg2intval . "\n";
+                if ($var === false) {
+                    $this->ircClass->notice($line['fromNick'], "That line contains no information.");
+                } else {
 
-			//Arg 2 is not a line number, add to end of list
-			if (strval($arg2intval) != $arg2 || $arg2intval == 0)
-			{
-				$query = substr($args['query'], strlen($args['arg1'])+1);
+                    $this->news[$args['cmd']]->deleteVar($chan, $arg2);
 
-				$this->news[$args['cmd']]->setIniVal($chan, $next, $query);
-				$this->news[$args['cmd']]->setIniVal($chan, "highest", $next);
-				$this->news[$args['cmd']]->writeIni();
-				$this->ircClass->notice($line['fromNick'], "Line added as " . $next . ".");
-			}
-			else //arg 2 is line number, add with that number if possible
-			{
-				$query = substr($args['query'], strlen($args['arg1'].$args['arg2'])+2);
-				$var = $this->news[$args['cmd']]->getIniVal($chan, $arg2);
+                    if ($arg2intval == $highest) {
+                        $vals = $this->news[$args['cmd']]->getSection($chan);
+                        $keys = array_keys($vals);
+                        ksort($keys);
+                        $highest = $keys[count($keys) - 1];
+                        $this->news[$args['cmd']]->setIniVal($chan, "highest", $highest);
+                    }
 
-				if ($var !== false)
-				{
-					$this->ircClass->notice($line['fromNick'], "Error, that line number is already filled.  You must delete it first.");
-				}
-				else
-				{
-					if ($arg2 > $highest)
-					{
-						$next = $arg2;
-					}
-					$this->news[$args['cmd']]->setIniVal($chan, $arg2, $query);
-					$this->news[$args['cmd']]->setIniVal($chan, "highest", $next);
-					$this->news[$args['cmd']]->writeIni();
-					$this->ircClass->notice($line['fromNick'], "Line added.");
-				}
-			}
+                    $this->news[$args['cmd']]->writeIni();
+                    $this->ircClass->notice($line['fromNick'], "The line was successfully deleted.");
+                }
+            }
+        } else {
+            $this->ircClass->notice($line['fromNick'], "Error, you must specify a line number to delete.  Use !news show to see line numbers");
+        }
+    }
 
-		}
-		else
-		{
-			$this->ircClass->notice($line['fromNick'], "You must specify some information to add.");
-		}
-	}
+    private function news_add($line, $args)
+    {
+        $chan = irc::myStrToLower($line['to']);
+        $nick = irc::myStrToLower($line['fromNick']);
 
-	private function news_clear($line, $args)
-	{
-		$chan = irc::myStrToLower($line['to']);
-		$nick = irc::myStrToLower($line['fromNick']);
+        if (!$this->ircClass->hasModeSet($chan, $nick, "oa")) {
+            return;
+        }
 
-		if (!$this->ircClass->hasModeSet($chan, $nick, "oa"))
-		{
-			return;
-		}
+        if ($this->news[$args['cmd']]->sectionExists($chan)) {
+            $next = intval($this->news[$args['cmd']]->getIniVal($chan, "highest")) + 1;
+        } else {
+            $next = 0 + 1;
+        }
 
-		if ($this->news[$args['cmd']]->sectionExists($chan))
-		{
-			$this->news[$args['cmd']]->deleteSection($chan);
-			$this->news[$args['cmd']]->writeIni();
-			$this->ircClass->notice($line['fromNick'], "All lines from this channel have been cleared.");
-		}
-		else
-		{
-			$this->ircClass->notice($line['fromNick'], "That channel does not have any news items set.");
-		}
-	}
+        if ($args['nargs'] > 1) {
+            $arg2 = $args['arg2'];
+            $arg2intval = intval($arg2);
+
+            echo $arg2 . "-" . $arg2intval . "\n";
+
+            //Arg 2 is not a line number, add to end of list
+            if (strval($arg2intval) != $arg2 || $arg2intval == 0) {
+                $query = substr($args['query'], strlen($args['arg1']) + 1);
+
+                $this->news[$args['cmd']]->setIniVal($chan, $next, $query);
+                $this->news[$args['cmd']]->setIniVal($chan, "highest", $next);
+                $this->news[$args['cmd']]->writeIni();
+                $this->ircClass->notice($line['fromNick'], "Line added as " . $next . ".");
+            } else //arg 2 is line number, add with that number if possible
+            {
+                $query = substr($args['query'], strlen($args['arg1'] . $args['arg2']) + 2);
+                $var = $this->news[$args['cmd']]->getIniVal($chan, $arg2);
+
+                if ($var !== false) {
+                    $this->ircClass->notice($line['fromNick'], "Error, that line number is already filled.  You must delete it first.");
+                } else {
+                    if ($arg2 > $highest) {
+                        $next = $arg2;
+                    }
+                    $this->news[$args['cmd']]->setIniVal($chan, $arg2, $query);
+                    $this->news[$args['cmd']]->setIniVal($chan, "highest", $next);
+                    $this->news[$args['cmd']]->writeIni();
+                    $this->ircClass->notice($line['fromNick'], "Line added.");
+                }
+            }
+
+        } else {
+            $this->ircClass->notice($line['fromNick'], "You must specify some information to add.");
+        }
+    }
+
+    private function news_clear($line, $args)
+    {
+        $chan = irc::myStrToLower($line['to']);
+        $nick = irc::myStrToLower($line['fromNick']);
+
+        if (!$this->ircClass->hasModeSet($chan, $nick, "oa")) {
+            return;
+        }
+
+        if ($this->news[$args['cmd']]->sectionExists($chan)) {
+            $this->news[$args['cmd']]->deleteSection($chan);
+            $this->news[$args['cmd']]->writeIni();
+            $this->ircClass->notice($line['fromNick'], "All lines from this channel have been cleared.");
+        } else {
+            $this->ircClass->notice($line['fromNick'], "That channel does not have any news items set.");
+        }
+    }
 
 }
 

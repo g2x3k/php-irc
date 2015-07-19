@@ -37,395 +37,368 @@
 
 /* Connection class.  A Layer between dcc/irc class and socket class. */
 /* To use, simply create an object, call the calls listed under the constructor in order. */
+
 /* Damn I'm hungry... */
 
-class connection {
+class connection
+{
 
-	//External Classes
-	private $socketClass;
-	private $ircClass;
-	private $timerClass;
+    //External Classes
+    private $socketClass;
+    private $ircClass;
+    private $timerClass;
 
-	//Internal variables
-	private $callbackClass;
-	private $host;
-	private $port;
-	private $connTimeout;
-	private $transTimeout;
-	private $sockInt;
+    //Internal variables
+    private $callbackClass;
+    private $host;
+    private $port;
+    private $connTimeout;
+    private $transTimeout;
+    private $sockInt;
 
-	//Function specific
-	private $connected;
-	private $connStartTime;
-	private $lastTransTime;
+    //Function specific
+    private $connected;
+    private $connStartTime;
+    private $lastTransTime;
 
-	//If this is set to true, this connection class will no longer function.
-	private $error;
-	private $errorMsg;
+    //If this is set to true, this connection class will no longer function.
+    private $error;
+    private $errorMsg;
 
-	//Called first
-	function __construct($host, $port, $connTimeout)
-	{
-		$this->error = true;
-		$this->errorMsg = "Connection not initialized";
-		$this->host = $host;
-		$this->port = $port;
-		$this->connTimeout = $connTimeout;
-		$this->transTimeout = 0;
-		$this->connected = false;
-		$this->sockInt = false;
-	}
+    //Called first
+    function __construct($host, $port, $connTimeout)
+    {
+        $this->error = true;
+        $this->errorMsg = "Connection not initialized";
+        $this->host = $host;
+        $this->port = $port;
+        $this->connTimeout = $connTimeout;
+        $this->transTimeout = 0;
+        $this->connected = false;
+        $this->sockInt = false;
+    }
 
-	//Called second
-	public function setSocketClass($class)
-	{
-		$this->socketClass = $class;
-	}
+    //Called second
+    public function setSocketClass($class)
+    {
+        $this->socketClass = $class;
+    }
 
-	//Called third
-	public function setIrcClass($class)
-	{
-		$this->ircClass = $class;
-	}
+    //Called third
+    public function setIrcClass($class)
+    {
+        $this->ircClass = $class;
+    }
 
-	//Called fourth
-	public function setCallbackClass($class)
-	{
-		$this->callbackClass = $class;
-	}
+    //Called fourth
+    public function setCallbackClass($class)
+    {
+        $this->callbackClass = $class;
+    }
 
-	//Called fifth
-	public function setTimerClass($class)
-	{
-		$this->timerClass = $class;
-	}
+    //Called fifth
+    public function setTimerClass($class)
+    {
+        $this->timerClass = $class;
+    }
 
-	//Called sixth
-	public function init()
-	{
-		$this->error = false;
+    //Called sixth
+    public function init()
+    {
+        $this->error = false;
 
-		if ($this->host != null)
-		{
-			if ($this->connTimeout <= 0)
-			{
-				$this->setError("Must set connection timeout > 0 for non-listening sockets");
-				return;
-			}
-		}
-		else
-		{
-			if ($this->connTimeout < 0)
-			{
-				$this->setError("Must set connection timeout >= 0 for listening sockets");
-				return;
-			}
-		}
+        if ($this->host != null) {
+            if ($this->connTimeout <= 0) {
+                $this->setError("Must set connection timeout > 0 for non-listening sockets");
+                return;
+            }
+        } else {
+            if ($this->connTimeout < 0) {
+                $this->setError("Must set connection timeout >= 0 for listening sockets");
+                return;
+            }
+        }
 
-		if (!is_object($this->callbackClass))
-		{
-			$this->setError("Specified callback class is not an object");
-			return;
-		}
+        if (!is_object($this->callbackClass)) {
+            $this->setError("Specified callback class is not an object");
+            return;
+        }
 
-		if (!is_object($this->socketClass))
-		{
-			$this->setError("Specified socket class is not an object");
-			return;
-		}
+        if (!is_object($this->socketClass)) {
+            $this->setError("Specified socket class is not an object");
+            return;
+        }
 
-		if (!is_object($this->ircClass))
-		{
-			$this->setError("Specified irc class is not an object");
-			return;
-		}
+        if (!is_object($this->ircClass)) {
+            $this->setError("Specified irc class is not an object");
+            return;
+        }
 
-		$sockInt = $this->socketClass->addSocket($this->host, $this->port); // add socket
-		if ($sockInt == false)
-		{
-			$this->setError("Could not create socket");
-			return;
-		}
+        $sockInt = $this->socketClass->addSocket($this->host, $this->port); // add socket
+        if ($sockInt == false) {
+            $this->setError("Could not create socket");
+            return;
+        }
 
-		$sockData = $this->socketClass->getSockData($sockInt);
+        $sockData = $this->socketClass->getSockData($sockInt);
 
-		$this->socketClass->setHandler($sockInt, $this->ircClass, $this, "handle");
+        $this->socketClass->setHandler($sockInt, $this->ircClass, $this, "handle");
 
-		//Set internal variables
-		if ($this->port == NULL)
-		{
-			$this->port = $sockData->port;
-		}
-		$this->sockInt = $sockInt;
+        //Set internal variables
+        if ($this->port == NULL) {
+            $this->port = $sockData->port;
+        }
+        $this->sockInt = $sockInt;
 
-		return $this->port;
-	}
-	
-	public function bind($ip)
-	{
-		if ($this->error != false || $this->sockInt == false)
-		{
-			return;
-		}
+        return $this->port;
+    }
 
-		if ($this->connected == true)
-		{
-			return;
-		}
+    public function bind($ip)
+    {
+        if ($this->error != false || $this->sockInt == false) {
+            return;
+        }
 
-		$this->socketClass->bindIP($this->sockInt, $ip);
-	}
-	
-	//Called to listen, only called by onAccept() function in this class
-	public function listen()
-	{
-		$this->error = false;
-		$this->connected = true;
-	}
+        if ($this->connected == true) {
+            return;
+        }
 
-	//Called last, and only to start connection to another server
-	public function connect()
-	{
-		if ($this->error == true)
-		{
-			return false;
-		}
+        $this->socketClass->bindIP($this->sockInt, $ip);
+    }
 
-		if ($this->connTimeout > 0)
-		{
-			$this->timerClass->addTimer(irc::randomHash(), $this, "connTimeout", "", $this->connTimeout);
-		}
+    //Called to listen, only called by onAccept() function in this class
+    public function listen()
+    {
+        $this->error = false;
+        $this->connected = true;
+    }
 
-		$this->timerClass->addTimer(irc::randomHash(), $this->socketClass, "connectSocketTimer", $this->sockInt, 1);
+    //Called last, and only to start connection to another server
+    public function connect()
+    {
+        if ($this->error == true) {
+            return false;
+        }
 
-		/* $this->socketClass->beginConnect($this->sockInt); */
-		$this->connStartTime = time();
-	}
+        if ($this->connTimeout > 0) {
+            $this->timerClass->addTimer(irc::randomHash(), $this, "connTimeout", "", $this->connTimeout);
+        }
 
-	public function disconnect()
-	{
-		unset($this->callbackClass);
-		$this->socketClass->killSocket($this->sockInt);
-		$this->socketClass->removeSocket($this->sockInt);
-		$this->setError("Disconnected from server");
-	}
+        $this->timerClass->addTimer(irc::randomHash(), $this->socketClass, "connectSocketTimer", $this->sockInt, 1);
 
-	public function getSockInt()
-	{
-		return $this->sockInt;
-	}
+        /* $this->socketClass->beginConnect($this->sockInt); */
+        $this->connStartTime = time();
+    }
 
-	public function setSockInt($sockInt)
-	{
-		$this->sockInt = $sockInt;
-	}
+    public function disconnect()
+    {
+        unset($this->callbackClass);
+        $this->socketClass->killSocket($this->sockInt);
+        $this->socketClass->removeSocket($this->sockInt);
+        $this->setError("Disconnected from server");
+    }
 
-	public function setTransTimeout($time)
-	{
-		$this->transTimeout = ($time < 0 ? 0 : $time);
-	}
+    public function getSockInt()
+    {
+        return $this->sockInt;
+    }
 
-	/* Timers */
-	
-	public function connTimeout()
-	{
-		if ($this->connected == false)
-		{
-			$this->handle(CONN_CONNECT_TIMEOUT);
-		}
-	}
+    public function setSockInt($sockInt)
+    {
+        $this->sockInt = $sockInt;
+    }
 
-	public function transTimeout()
-	{
-		if ($this->error == true)
-		{
-			return false;
-		}
+    public function setTransTimeout($time)
+    {
+        $this->transTimeout = ($time < 0 ? 0 : $time);
+    }
 
-		if ($this->connected == false)
-		{
-			return true;
-		}
+    /* Timers */
 
-		if ($this->transTimeout > 0)
-		{
-			if (time() > $this->transTimeout + $this->lastTransTime)
-			{
-				$this->handle(CONN_TRANSFER_TIMEOUT);
-			}
-		}
+    public function connTimeout()
+    {
+        if ($this->connected == false) {
+            $this->handle(CONN_CONNECT_TIMEOUT);
+        }
+    }
 
-		return true;
-	}
+    public function transTimeout()
+    {
+        if ($this->error == true) {
+            return false;
+        }
 
-	//handle function, handles all calls from socket class, and calls appropriate
-	//functions in the callback class
-	public function handle($msg)
-	{
+        if ($this->connected == false) {
+            return true;
+        }
 
-		if ($this->socketClass->getSockStatus($this->sockInt) === false)
-		{
-			return false;
-		}
+        if ($this->transTimeout > 0) {
+            if (time() > $this->transTimeout + $this->lastTransTime) {
+                $this->handle(CONN_TRANSFER_TIMEOUT);
+            }
+        }
 
-		$stat = false;
+        return true;
+    }
 
-		if ($this->error == true)
-		{
-			return false;
-		}
+    //handle function, handles all calls from socket class, and calls appropriate
+    //functions in the callback class
+    public function handle($msg)
+    {
 
-		switch ($msg)
-		{
-			case CONN_CONNECT:
-				$stat = $this->onConnect();
-				break;
-			case CONN_READ:
-				$stat = $this->onRead();
-				break;
-			case CONN_WRITE:
-				$stat = $this->onWrite();
-				break;
-			case CONN_ACCEPT:
-				$stat = $this->onAccept();
-				break;
-			case CONN_DEAD:
-				$stat = $this->onDead();
-				break;
-			case CONN_TRANSFER_TIMEOUT:
-				$stat = $this->onTransferTimeout();
-				break;
-			case CONN_CONNECT_TIMEOUT:
-				$stat = $this->onConnectTimeout();
-				break;
-			default:
-				return false;
-				break;
-		}
+        if ($this->socketClass->getSockStatus($this->sockInt) === false) {
+            return false;
+        }
 
-		return $stat;
-	}
+        $stat = false;
 
-	/* Specific handling functions */
+        if ($this->error == true) {
+            return false;
+        }
 
-	private function onTransferTimeout()
-	{
-		$this->callbackClass->onTransferTimeout($this);
-	}
+        switch ($msg) {
+            case CONN_CONNECT:
+                $stat = $this->onConnect();
+                break;
+            case CONN_READ:
+                $stat = $this->onRead();
+                break;
+            case CONN_WRITE:
+                $stat = $this->onWrite();
+                break;
+            case CONN_ACCEPT:
+                $stat = $this->onAccept();
+                break;
+            case CONN_DEAD:
+                $stat = $this->onDead();
+                break;
+            case CONN_TRANSFER_TIMEOUT:
+                $stat = $this->onTransferTimeout();
+                break;
+            case CONN_CONNECT_TIMEOUT:
+                $stat = $this->onConnectTimeout();
+                break;
+            default:
+                return false;
+                break;
+        }
 
-	private function onConnectTimeout()
-	{
-		$this->callbackClass->onConnectTimeout($this);
-	}
+        return $stat;
+    }
 
-	private function onConnect()
-	{
-		$this->connected = true;
+    /* Specific handling functions */
 
-		if ($this->transTimeout > 0)
-		{
-			$this->timerClass->addTimer(irc::randomHash(), $this, "transTimeout", "", $this->transTimeout);
-		}
+    private function onTransferTimeout()
+    {
+        $this->callbackClass->onTransferTimeout($this);
+    }
 
-		$this->callbackClass->onConnect($this);
-		return false;
-	}
+    private function onConnectTimeout()
+    {
+        $this->callbackClass->onConnectTimeout($this);
+    }
 
-	//For this function, true can be returned from onRead() to input more data.
-	private function onRead()
-	{
-		$this->lastTransTime = time();
+    private function onConnect()
+    {
+        $this->connected = true;
 
-		$stat = $this->callbackClass->onRead($this);
-		if ($stat !== true)
-		{
-			$this->socketClass->clearReadSchedule($this->sockInt);
-		}
+        if ($this->transTimeout > 0) {
+            $this->timerClass->addTimer(irc::randomHash(), $this, "transTimeout", "", $this->transTimeout);
+        }
 
-		return $stat;
-	}
+        $this->callbackClass->onConnect($this);
+        return false;
+    }
 
-	private function onWrite()
-	{
-		$this->socketClass->clearWriteSchedule($this->sockInt);
-		$this->lastTransTime = time();
-		$this->callbackClass->onWrite($this);
-		return false;
-	}
+    //For this function, true can be returned from onRead() to input more data.
+    private function onRead()
+    {
+        $this->lastTransTime = time();
 
-	private function onAccept()
-	{
-		//Get the sockInt from the socketClass
-		$newSockInt = $this->socketClass->hasAccepted($this->sockInt);
+        $stat = $this->callbackClass->onRead($this);
+        if ($stat !== true) {
+            $this->socketClass->clearReadSchedule($this->sockInt);
+        }
 
-		if ($newSockInt === false)
-		{
-			//False alarm.. just ignore it.
-			return false;
-		}
+        return $stat;
+    }
 
-		//Create a new connection object for the new socket connection, then return it to onAccept
-		//We must assume that onAccept will handle the connection object.  Otherwise it'll die, and the
-		//connection will be orphaned.
+    private function onWrite()
+    {
+        $this->socketClass->clearWriteSchedule($this->sockInt);
+        $this->lastTransTime = time();
+        $this->callbackClass->onWrite($this);
+        return false;
+    }
 
-		$newConn = new connection(null, null, 0);
-		$newConn->setSocketClass($this->socketClass);
-		$newConn->setIrcClass($this->ircClass);
-		$newConn->setCallbackClass($this->callbackClass); //Can be overwritten in the onAccept function
-		$newConn->setTimerClass($this->timerClass);
-		$newConn->listen();
-		//We don't need to call init(), we're already setup.
-		
-		//Setup our connection transmission timeout thing.
-		if ($this->transTimeout > 0)
-		{
-			$this->timerClass->addTimer(irc::randomHash(), $newConn, "transTimeout", "", $this->transTimeout);
-		}
-		
-		$newConn->setTransTimeout($this->transTimeout);
+    private function onAccept()
+    {
+        //Get the sockInt from the socketClass
+        $newSockInt = $this->socketClass->hasAccepted($this->sockInt);
 
-		//Set handler for our new sockInt to new connection class
-		$this->socketClass->setHandler($newSockInt, $this->ircClass, $newConn, "handle");
+        if ($newSockInt === false) {
+            //False alarm.. just ignore it.
+            return false;
+        }
 
-		//Set our new sockInt
-		$newConn->setSockInt($newSockInt);
+        //Create a new connection object for the new socket connection, then return it to onAccept
+        //We must assume that onAccept will handle the connection object.  Otherwise it'll die, and the
+        //connection will be orphaned.
 
-		//Call our callback function for accepting with old object, and new object.
-		$this->callbackClass->onAccept($this, $newConn);
-		return false;
-	}
+        $newConn = new connection(null, null, 0);
+        $newConn->setSocketClass($this->socketClass);
+        $newConn->setIrcClass($this->ircClass);
+        $newConn->setCallbackClass($this->callbackClass); //Can be overwritten in the onAccept function
+        $newConn->setTimerClass($this->timerClass);
+        $newConn->listen();
+        //We don't need to call init(), we're already setup.
 
-	private function onDead()
-	{
-		if ($this->connected == true)
-		{
-			$this->setError("Connection is dead");
-		}
-		else
-		{
-			$this->setError("Could not connect: " . $this->socketClass->getSockStringError($this->sockInt));
-		}
-		$this->callbackClass->onDead($this);
-		return false;
-	}
+        //Setup our connection transmission timeout thing.
+        if ($this->transTimeout > 0) {
+            $this->timerClass->addTimer(irc::randomHash(), $newConn, "transTimeout", "", $this->transTimeout);
+        }
 
-	/* Error handling routines */
+        $newConn->setTransTimeout($this->transTimeout);
 
-	private function setError($msg)
-	{
-		$this->error = true;
-		$this->errorMsg = $msg;
-	}
+        //Set handler for our new sockInt to new connection class
+        $this->socketClass->setHandler($newSockInt, $this->ircClass, $newConn, "handle");
 
-	public function getError()
-	{
-		return $this->error;
-	}
+        //Set our new sockInt
+        $newConn->setSockInt($newSockInt);
 
-	public function getErrorMsg()
-	{
-		return $this->errorMsg;
-	}
+        //Call our callback function for accepting with old object, and new object.
+        $this->callbackClass->onAccept($this, $newConn);
+        return false;
+    }
+
+    private function onDead()
+    {
+        if ($this->connected == true) {
+            $this->setError("Connection is dead");
+        } else {
+            $this->setError("Could not connect: " . $this->socketClass->getSockStringError($this->sockInt));
+        }
+        $this->callbackClass->onDead($this);
+        return false;
+    }
+
+    /* Error handling routines */
+
+    private function setError($msg)
+    {
+        $this->error = true;
+        $this->errorMsg = $msg;
+    }
+
+    public function getError()
+    {
+        return $this->error;
+    }
+
+    public function getErrorMsg()
+    {
+        return $this->errorMsg;
+    }
 
 }
 

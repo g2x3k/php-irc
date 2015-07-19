@@ -1,4 +1,5 @@
 <?php
+
 /*
 +---------------------------------------------------------------------------
 |   PHP-IRC v2.2.1 Service Release
@@ -35,169 +36,165 @@
 +---------------------------------------------------------------------------
 */
 
-class mysql {
+class mysql
+{
 
-  private $dbIndex;
-  private $prefix;
-  private $queries = 0;
-  private $isConnected = false;
+    private $dbIndex;
+    private $prefix;
+    private $queries = 0;
+    private $isConnected = false;
 
-  private $user;
-  private $pass;
-  private $database;
-  private $host;
-  private $port;
+    private $user;
+    private $pass;
+    private $database;
+    private $host;
+    private $port;
 
-  public function __construct($host, $database, $user, $pass, $prefix, $port = 3306)
-  {
-    $this->user = $user;
-    $this->pass = $pass;
-    $this->host = $host;
-    $this->database = $database;
-    $this->port = $port;
-
-    $db = mysql_connect($host . ":" . $port, $user, $pass);
-
-    if (!$db)
+    public function __construct($host, $database, $user, $pass, $prefix, $port = 3306)
     {
-      return;
+        $this->user = $user;
+        $this->pass = $pass;
+        $this->host = $host;
+        $this->database = $database;
+        $this->port = $port;
+
+        $db = mysql_connect($host . ":" . $port, $user, $pass);
+
+        if (!$db) {
+            return;
+        }
+
+        $dBase = mysql_select_db($database, $db);
+
+        if (!$dBase) {
+            return;
+        }
+
+        $this->prefix = $prefix;
+        $this->dbIndex = $db;
+        $this->isConnected = true;
     }
 
-    $dBase = mysql_select_db($database, $db);
-
-    if (!$dBase)
+    public function reconnect()
     {
-      return;
+        $db = mysql_connect($this->host . ":" . $this->port, $this->user, $this->pass, true);
+
+        if ($db === false) {
+            return false;
+        }
+
+        $dBase = mysql_select_db($this->database, $db);
+
+        if ($dBase === false) {
+            return false;
+        }
+
+        $this->dbIndex = $db;
+        $this->isConnected = true;
+        return true;
     }
 
-    $this->prefix = $prefix;
-    $this->dbIndex = $db;
-    $this->isConnected = true;
-  }
-
-  public function reconnect()
-  {
-    $db = mysql_connect($this->host . ":" . $this->port, $this->user, $this->pass, true);
-
-    if ($db === false)
-    {
-      return false;
-    }
-
-    $dBase = mysql_select_db($this->database, $db);
-
-    if ($dBase === false)
-    {
-      return false;
-    }
-
-    $this->dbIndex = $db;
-    $this->isConnected = true;
-      return true;
-  }
     public function getInsid()
     {
         return (@mysql_insert_id($this->dbIndex));
     }
-  public function getErrno()
+
+    public function getErrno()
     {
         return (@mysql_errno($this->dbIndex));
     }
-  public function getError()
-  {
-    return (@mysql_error($this->dbIndex));
-  }
 
-  public function isConnected()
-  {
-    return $this->isConnected;
-  }
-
-  //Call by reference switched to function declaration, 05/13/05
-  private function fixVar($id, &$values)
-  {
-    return mysql_real_escape_string($values[intval($id)-1], $this->dbIndex);
-  }
-
-  public function query($query, $values = array())
-  {
-
-    if (!is_array($values))
-    $values = array($values);
-
-    $query = @preg_replace('/\[([0-9]+)]/e', "\$this->fixVar(\\1, \$values)", $query);
-
-    $this->queries++;
-
-    $data = mysql_query($query, $this->dbIndex);
-
-    // reconnect if no connection
-    if (mysql_errno() == 2006) {
-      if ($this->reconnect()) {
-        $data = mysql_query($query  , $this->dbIndex);
-      }
-      else return;
-    }
-
-    if (!$data)
+    public function getError()
     {
-      return false;
+        return (@mysql_error($this->dbIndex));
     }
-    else
-    return $data;
-  }
 
-
-  public function queryFetch($query, $values = array())
-  {
-
-    if (!is_array($values))
-    $values = array($values);
-
-    $query = preg_replace('/\[([0-9]+)]/e', "\$this->fixVar(\\1, &\$values)", $query);
-
-    $this->queries++;
-
-    $data= mysql_query($query, $this->dbIndex);
-
-    if (!$data)
+    public function isConnected()
     {
-      return false;
+        return $this->isConnected;
     }
 
-    return mysql_fetch_array($data);
-  }
+    //Call by reference switched to function declaration, 05/13/05
+    private function fixVar($id, &$values)
+    {
+        return mysql_real_escape_string($values[intval($id) - 1], $this->dbIndex);
+    }
+
+    public function query($query, $values = array())
+    {
+
+        if (!is_array($values))
+            $values = array($values);
+
+        $query = @preg_replace('/\[([0-9]+)]/e', "\$this->fixVar(\\1, \$values)", $query);
+
+        $this->queries++;
+
+        $data = mysql_query($query, $this->dbIndex);
+
+        // reconnect if no connection
+        if (mysql_errno() == 2006) {
+            if ($this->reconnect()) {
+                $data = mysql_query($query, $this->dbIndex);
+            } else return;
+        }
+
+        if (!$data) {
+            return false;
+        } else
+            return $data;
+    }
 
 
-  public function fetchArray($toFetch)
-  {
-    return mysql_fetch_array($toFetch);
-  }
+    public function queryFetch($query, $values = array())
+    {
 
-  public function fetchRow($toFetch)
-  {
-    return mysql_fetch_row($toFetch);
-  }
+        if (!is_array($values))
+            $values = array($values);
 
-  public function close()
-  {
-    @mysql_close($this->dbIndex);
-  }
+        $query = preg_replace('/\[([0-9]+)]/e', "\$this->fixVar(\\1, &\$values)", $query);
 
-  public function lastID()
-  {
-    return mysql_insert_id();
-  }
+        $this->queries++;
 
-  public function numRows($toFetch)
-  {
-    return mysql_num_rows($toFetch);
-  }
+        $data = mysql_query($query, $this->dbIndex);
 
-  public function numQueries()
-  {
-    return $this->queries;
-  }
+        if (!$data) {
+            return false;
+        }
+
+        return mysql_fetch_array($data);
+    }
+
+
+    public function fetchArray($toFetch)
+    {
+        return mysql_fetch_array($toFetch);
+    }
+
+    public function fetchRow($toFetch)
+    {
+        return mysql_fetch_row($toFetch);
+    }
+
+    public function close()
+    {
+        @mysql_close($this->dbIndex);
+    }
+
+    public function lastID()
+    {
+        return mysql_insert_id();
+    }
+
+    public function numRows($toFetch)
+    {
+        return mysql_num_rows($toFetch);
+    }
+
+    public function numQueries()
+    {
+        return $this->queries;
+    }
 
 }
 

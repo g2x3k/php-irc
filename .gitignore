@@ -169,8 +169,7 @@ pip-log.txt
 ################
 *.log
 peak.ini
-**/peak.ini
-*/peak.ini
+*peak.ini
 modules/peak_mod/peak.ini
 seen.ini
 
@@ -189,14 +188,14 @@ modules/g2pre/*
 modules/g2trace/*
 modules/AutoDL/*
 modules/l13convert/*
+cookies/*
+testing.php
 #conf files
 layer13.conf
 layer13function.conf
 l13a.conf
 l13d.conf
-l13convert.conf
-cookies/*
-testing.php
-l13afunctions.conf
 l13c.conf
+l13afunctions.conf
 l13cfunctions.conf
+l13dfunctions.conf

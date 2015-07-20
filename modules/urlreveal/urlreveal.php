@@ -52,7 +52,7 @@ class urlreveal extends module
         if (preg_match("/(#dontdointhischan|#orthis)/i", $channel))
             return;
 
-        $preg = "(((ht){1}tp:\/\/|www\.)[-a-zA-Z0-9@:%_\+.~#?&\/\/=]+)"; //regex for url reconizing
+        $preg = "(((ht){1}tp(s|):\/\/|www\.)[-a-zA-Z0-9@:%_\+.~#?&\/\/=]+)"; //regex for url reconizing
         if (preg_match("/$preg/i", $text, $matches)) { // fix better url reconizing
             $url = $matches[0];
 
@@ -128,7 +128,7 @@ class urlreveal extends module
                             $storeinfo = json_decode(file_get_contents($storeurl), true);
 
                             $d = $storeinfo[$appID]["data"];
-                            print_r($d);
+                            //print_r($d);
 
                             echo "got store data ..";
                             $app['name'] = $d['name'];
@@ -186,9 +186,17 @@ class urlreveal extends module
                             else
                                 $pub = $d['publishers'][0] . "/" . $d['developers'][0];
 
-                            $title = $pub . " - " . $app["name"] . " on SteamStore$onsale";
 
-                            $sumup = "7Cat: $app[cat] - 7Platform: $app[platform] - 7Genre: $app[genre] - 7Price: " . $price;
+
+
+                            $title = $pub . " Presents " . ($d["type"] == "dlc" ? "[".$d["fullgame"]["name"]."/DLC] ".str_replace($d["fullgame"]["name"].":", "",$app["name"]) : $app["name"]) .$onsale;
+
+                            if (strlen($d['website']) > 0)
+                                $www = " 7Website: ".$d['website'];
+
+
+
+                            $sumup = (strlen($app["cat"])>0 ? "7Cat: $app[cat] - " : "")."7Platform: $app[platform] - 7Genre: $app[genre] - 7Price: " . $price.$www;
                         }
                     }
 
@@ -213,7 +221,7 @@ class urlreveal extends module
 
 
                     $wasted = $res[connection] + $res[redirtime];
-                    $this->ircClass->privMsg($channel, "7URL ($urlinfo) - 7Title: $title - 7Speed: " .
+                    $this->ircClass->privMsg($channel, "7URL $urlinfo 7Title: $title - 7Speed: " .
                         $this->mksize($res[size]) . "@" . $this->mksize($res["speed"]) .
                         "/s 15 other stats [type: $res[type] / dns-lookup: $res[dnslookup] / wasted: $wasted]");
 

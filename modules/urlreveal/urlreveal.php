@@ -13,7 +13,7 @@ class urlreveal extends module
 
     public function init()
     {
-        $this->conf["youtube_apikey"] = "xxx"; //create a project at https://console.developers.google.com to get apikey "bs google"
+        $this->conf["youtube_apikey"] = "AIzaSyDtmgm9nJRQhWg4j1SetCH-vDMZ3_UZfK0"; // to get your own key, create a project at https://console.developers.google.com to get apikey "bs google"
         $this->conf["steam_bundledetails"] = "count"; // can be list or count (warning: list can be loooong)
     }
 
@@ -249,13 +249,14 @@ class urlreveal extends module
                             if (substr($pu, 0, 2) == "v=")
                                 $vidID = substr($pu, 2);
 
-
                         $apiurl = "https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" . $vidID . "&key=" . $this->conf["youtube_apikey"];
                         $data = json_decode(file_get_contents($apiurl));
                         $data = $data->items[0]->snippet;
 
                         $title = $data->title . " - 1,0 You0,4tube ";
-                        $sumup = "7Description: " . $data->description;
+
+                        if ($data->title != $data->description)
+                        $sumup = "7Description: ".$data->description;
 
                     }
 
@@ -346,50 +347,4 @@ class urlreveal extends module
             return number_format($bytes / 1099511627776, 2) . " TB";
     }
 }
-
-/*
-Vers History:
-0.9.1:
--fixed size on downloads again.. now using info from header Content-Length: field (still seems to be fuckd)
--removed header output from curl so can save results as they are etc a image
-0.9:
--added img support: height & width & size
--disabled verbose output
--modified keep-alive time to match timeout
--moved vers his to bottom
--added configuration var ["usecookies"] valid options (true/false)
--added output configuration
--added more stats to output
--commented code
-0.8: (priv):
--cosmetics on output
--increased timeout
-0.7: (final):
--cleaned code
--added speed measurement fun phun
--fixed more case sens bs .. :)
-0.6: (final):
--fixed ssl support
--fixed trailing slahes on output
-0.5:
--updated user-agent to firefox 3.6.3
--added support for multiline titles
--added gzip,deflate support
--changed to keep-alive connection
--added UTF-8 support
--added cookies support
--fixed caseing problems now looks up right url�s for etc youtube where id is case-sens
--fixed not wrapping out start/end tags in extractstring due to case sens
-0.4:
--added ignored nicks
-0.3:
--added redirect info
--cleaned code
-0.2:
--added html_entity_decode to decode things like &lt; into <
--follows redirects on minified urls
-0.1:
--first piece it works
-
-*/
 ?>

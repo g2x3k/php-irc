@@ -75,7 +75,7 @@ class urlreveal extends module
 
                 if ($surl != $nsurl) // check for redirects and set urlinfo
 
-                    $urlinfo = "$surl redirects too $nsurl"; // -||-
+                    $urlinfo = "$surl redirects to $nsurl"; // -||-
                 else // -||-
 
                     $urlinfo = "$surl"; // -||-
@@ -120,8 +120,9 @@ class urlreveal extends module
                     if (preg_match("/store.steampowered.com/i", $url)) {
                         echo "STEAM STORE URL\n";
                         $appID = preg_match("/\/([0-9]+)/i", $url, $matches);
-                        $appID = $matches[1];
-                        if (is_int($appID)) {
+                        $appID = (int)trim($matches[1]);
+                        echo "APPiD -$appID-\n";
+                        if (is_int($appID) AND $appID > 0) {
                             $storeurl = "http://store.steampowered.com/api/appdetails?appids=$appID";
                             $storeinfo = json_decode(file_get_contents($storeurl), true);
 
@@ -131,6 +132,8 @@ class urlreveal extends module
                             echo "got store data ..";
                             $app['name'] = $d['name'];
                             $app['www'] = $d["website"];
+
+                            $app["metacritic"]["score"] = $d["metacritic"]["score"];
 
 
                             if ($d['price_overview']['initial'] > $d['price_overview']['final']) {
@@ -177,9 +180,14 @@ class urlreveal extends module
                                 $app['platform'][] = "Linux";
                             $app['platform'] = implode("/", $app["platform"]);
 
-                            $title = $app["name"] . " on SteamStore$onsale";
+                            if ($d['publishers'][0] == $d['developers'][0])
+                                $pub = $d['developers'][0];
+                            else
+                                $pub = $d['publishers'][0] . "/" . $d['developers'][0];
 
-                            $sumup = "7Cat: $app[cat] - 7Platform: $app[platform] - 7Genre:$app[genre] - 7Price: " . $price;
+                            $title = $pub . " - " . $app["name"] . " on SteamStore$onsale";
+
+                            $sumup = "7Cat: $app[cat] - 7Platform: $app[platform] - 7Genre: $app[genre] - 7Price: " . $price;
                         }
                     }
 
@@ -202,14 +210,14 @@ class urlreveal extends module
                      }
  */
 
-                    //$et = rtrxtime($exectimer);
+
                     $wasted = $res[connection] + $res[redirtime];
                     $this->ircClass->privMsg($channel, "7URL ($urlinfo) - 7Title: $title - 7Speed: " .
                         $this->mksize($res[size]) . "@" . $this->mksize($res["speed"]) .
                         "/s 15 other stats [type: $res[type] / dns-lookup: $res[dnslookup] / wasted: $wasted]");
 
                     if (strlen($sumup) >= 2 and strlen($sumup) <= 512)
-                        $this->ircClass->privMsg($channel, "7Description: $sumup");
+                        $this->ircClass->privMsg($channel, "$sumup");
                 }
         }
     }

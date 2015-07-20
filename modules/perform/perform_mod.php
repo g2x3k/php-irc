@@ -37,12 +37,19 @@ class perform_mod extends module
         else
             $mode = "MODE";
 
+        // when joing #vhost set a vhost and part the channel
+        if ($nick == $me AND $channel == "#vhost") {
+            $this->ircClass->privMsg($channel, "!vhost Layer13.net");
+            $this->ircClass->removeMaintain($channel);
+            $this->ircClass->partChannel($channel);
+        }
         // make bot give itself +a upon entering a channel
-        if ($nick == $me) {
+        elseif ($nick == $me) {
             $this->ircClass->sendRaw("$mode $channel +a $me ", true);
         }
+        // a welcome text ?
         else {
-            // a welcome text ?
+
         }
 
     }

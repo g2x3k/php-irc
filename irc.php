@@ -1871,6 +1871,10 @@ class irc
     }
 
 
+    public function partChannel($chan)
+    {
+        $this->pushAfter($this->clientFormat("PART " . $chan));
+    }
     public function joinChannel($chan)
     {
         $this->pushBefore($this->clientFormat("JOIN " . $chan));

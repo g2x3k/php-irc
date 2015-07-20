@@ -13,7 +13,7 @@ class urlreveal extends module
 
     public function init()
     {
-
+        $this->conf["youtube_apikey"] = "xxx"; //create a project at https://console.developers.google.com to get apikey "bs google"
         $this->conf["steam_bundledetails"] = "count"; // can be list or count (warning: list can be loooong)
     }
 
@@ -67,7 +67,7 @@ class urlreveal extends module
 
             $list = $dom->getElementsByTagName("title");
             if ($list->length > 0)
-                $title = html_entity_decode($list->item(0)->textContent);
+                $title = html_entity_decode(str_replace(array("\n", '\r'), "", $list->item(0)->textContent));
             else
                 $title = "NO FkInG <TiTLE> WeB 2.0 Now without title tags ...";
 
@@ -79,16 +79,14 @@ class urlreveal extends module
                 $surl = substr(str_replace($urlstrip, "", $url), 0, 20);
                 $nsurl = substr(str_replace($urlstrip, "", $nurl), 0, 20);
                 if ($surl[strlen($surl) - 1] == "/")
-                    $surl = substr($surl, 0, strlen($surl) - 1); // remove trailing slash
+                    $surl = substr($surl, 0, strlen($surl) - 1);
                 if ($nsurl[strlen($nsurl) - 1] == "/")
-                    $nsurl = substr($nsurl, 0, strlen($nsurl) - 1); // -||-
+                    $nsurl = substr($nsurl, 0, strlen($nsurl) - 1);
 
-                if ($surl != $nsurl) // check for redirects and set urlinfo
-
-                    $urlinfo = "$surl redirects to $nsurl"; // -||-
-                else // -||-
-
-                    $urlinfo = "$surl"; // -||-
+                if ($surl != $nsurl)
+                    $urlinfo = "$surl redirects to $nsurl";
+                else
+                    $urlinfo = "$surl";
 
                 $myFile = "tmpimg";
                 $fh = fopen($myFile, 'w');
@@ -100,6 +98,7 @@ class urlreveal extends module
                 $this->ircClass->privMsg($channel, "image url ($urlinfo) imgsize $width" . "x" .
                     "$height in " . mksize($res[size]) . " 7Speed: " . $this->mksize($res["speed"]) .
                     "/s 15 other stats [type $res[type] / dns-lookup $res[dnslookup] / wasted $res[connection] + $res[redirtime]]");
+                unlink("tmpimg");
             } else
                 if ($title) { // if we got a title its a page return info
                     $urlstrip = array("http://", "www.", "https://", "HTTP://", "WWW.", "HTTPS://"); // stripcode to make urls nice
@@ -152,11 +151,11 @@ class urlreveal extends module
                             if ($this->conf["steam_bundledetails"] == "list")
                                 $included = implode(", ", $incapps);
                             if ($this->conf["steam_bundledetails"] == "count")
-                                $included = count($storeinfo['apps']) . " Games";
+                                $included = count($storeinfo['apps']) . " Items";
 
 
-                            $title = $storeinfo['name']. "$onsale";
-                            $sumup = "7Price: $price$onsale 7Includes: $included";
+                            $title = $storeinfo['name'] . "$onsale";
+                            $sumup = "7Price: $price 7Includes: $included";
 
                         }
                     }
@@ -240,24 +239,25 @@ class urlreveal extends module
                         }
                     }
 
-                    /* // Youtube ... update to new api ..
-                     if (preg_match("/youtube/i", $title)) {
-                         // api override for youtube since have captha
-                         $purl = parse_url($url);
-                         $purl = explode("&", $purl["query"]);
 
-                         foreach ($purl as $pu)
-                             if (substr($pu, 0, 2) == "v=")
-                                 $vidID = substr($pu, 2);
+                    if (preg_match("/youtube/i", $title)) {
+                        // api override for youtube since have captha
+                        $purl = parse_url($url);
+                        $purl = explode("&", $purl["query"]);
 
-                         $apiurl = "http://gdata.youtube.com/feeds/api/videos/" . $vidID;
-                         $doc = new DOMDocument;
-                         $doc->load($apiurl);
-                         $title = $doc->getElementsByTagName("title")->item(0)->nodeValue .
-                             " - 1,0 You0,4tube ";
-                         $sumup = $doc->getElementsByTagName("content")->item(0)->nodeValue;
-                     }
- */
+                        foreach ($purl as $pu)
+                            if (substr($pu, 0, 2) == "v=")
+                                $vidID = substr($pu, 2);
+
+
+                        $apiurl = "https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" . $vidID . "&key=" . $this->conf["youtube_apikey"];
+                        $data = json_decode(file_get_contents($apiurl));
+                        $data = $data->items[0]->snippet;
+
+                        $title = $data->title . " - 1,0 You0,4tube ";
+                        $sumup = "7Description: " . $data->description;
+
+                    }
 
 
                     $wasted = $res['connection'] + $res['redirtime'];

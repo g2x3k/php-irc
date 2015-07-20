@@ -7,17 +7,14 @@ class urlreveal extends module
 
     public $title = "urlreveal";
     public $author = "g2x3k";
-    public $version = "0.9";
-    public $date = "22-05-10 23:30";
+    public $version = "0.98";
+    public $date = "20-07-15 23:05";
     private $delay = 0;
 
     public function init()
     {
-        // Add your timer declarations and whatever else here...
-        $urlconf["usecookies"] = true; //mm cookies
-        //7URL ($urlinfo) - 7Title: $title - 7Speed: ".$this->mksize($res["speed"])."/s"
-        $urlconf["output"] = "7URL ([urlinfo]) - 7Title: [title] - 7Speed: " . $this->
-            mksize($res["speed"]) . "/s";
+
+        $this->conf["steam_bundledetails"] = "count"; // can be list or count (warning: list can be loooong)
     }
 
     public function priv_urlreveal($line, $args)
@@ -55,14 +52,24 @@ class urlreveal extends module
         $preg = "(((ht){1}tp(s|):\/\/|www\.)[-a-zA-Z0-9@:%_\+.~#?&\/\/=]+)"; //regex for url reconizing
         if (preg_match("/$preg/i", $text, $matches)) { // fix better url reconizing
             $url = $matches[0];
-
             $res = $this->get_url_contents("$url"); // get url contents
-            if (!preg_match("/<title>/i", $res["html"]))
+
+
+            /*if (!preg_match("/<title()>/i", $res["html"]))
                 $title = "NO FkInG <TiTLE> WeB 2.0 Now without title tags ...";
             else
                 $title = html_entity_decode($this->extractstring("<title>", "<\/title>", $res["html"])); //extract the title
+            */
 
+            $dom = new DOMDocument();
+            libxml_use_internal_errors(true);
+            $dom->loadHTML($res["html"]);
 
+            $list = $dom->getElementsByTagName("title");
+            if ($list->length > 0)
+                $title = html_entity_decode($list->item(0)->textContent);
+            else
+                $title = "NO FkInG <TiTLE> WeB 2.0 Now without title tags ...";
 
 
             $nurl = urldecode($res["url"]); // set new "niceurl"
@@ -93,8 +100,7 @@ class urlreveal extends module
                 $this->ircClass->privMsg($channel, "image url ($urlinfo) imgsize $width" . "x" .
                     "$height in " . mksize($res[size]) . " 7Speed: " . $this->mksize($res["speed"]) .
                     "/s 15 other stats [type $res[type] / dns-lookup $res[dnslookup] / wasted $res[connection] + $res[redirtime]]");
-            }
-            else
+            } else
                 if ($title) { // if we got a title its a page return info
                     $urlstrip = array("http://", "www.", "https://", "HTTP://", "WWW.", "HTTPS://"); // stripcode to make urls nice
                     //todo nice url formatting
@@ -117,18 +123,53 @@ class urlreveal extends module
                     // extensions/plugins ...
 
                     // Steam store .
-
-                    if (preg_match("/store.steampowered.com(\/app|\/agecheck\/app)/i", $url)) {
-                        echo "STEAM STORE URL\n";
+                    if (preg_match("/store.steampowered.com\/sub/i", $url)) {
+                        // bundle
                         $appID = preg_match("/\/([0-9]+)/i", $url, $matches);
                         $appID = (int)trim($matches[1]);
                         echo "APPiD -$appID-\n";
                         if (is_int($appID) AND $appID > 0) {
+                            $storeurl = "http://store.steampowered.com/api/packagedetails/?packageids=$appID";
+                            $storeinfo = json_decode(file_get_contents($storeurl), true);
+                            $storeinfo = $storeinfo[$appID]["data"];
+                            print_r($storeinfo);
+
+                            $cur = ($storeinfo["price"]['currency'] == "EUR" ? "€" : ($storeinfo["price"]['currency'] == "USD" ? "$" : $storeinfo["price"]['currency']));
+
+                            if ($storeinfo["price"]["initial"] > $storeinfo["price"]["final"]) {
+                                // discount
+                                $price = "On sale " . round($storeinfo["price"]["final"] / 100, 2) . "$cur";
+                                $onsale = " (Save " . $storeinfo["price"]['discount_percent'] . "% - Down from " . round($storeinfo["price"]['initial'] / 100, 2) . "$cur)";
+                            } else {
+                                $price = "" . round($storeinfo["price"]["final"] / 100, 2) . "$cur";
+                            }
+
+
+                            foreach ($storeinfo['apps'] as $tmp) {
+                                $incapps[] = $tmp["name"];
+                            }
+
+                            if ($this->conf["steam_bundledetails"] == "list")
+                                $included = implode(", ", $incapps);
+                            if ($this->conf["steam_bundledetails"] == "count")
+                                $included = count($storeinfo['apps']) . " Games";
+
+                            $sumup = "7Price: $price$onsale 7Includes: $included";
+
+                        }
+                    }
+                    if (preg_match("/store.steampowered.com(\/app|\/agecheck\/app)/i", $url)) {
+                        // app
+                        $appID = preg_match("/\/([0-9]+)/i", $url, $matches);
+                        $appID = (int)trim($matches[1]);
+                        echo "APPiD -$appID-\n";
+                        if (is_int($appID) AND $appID > 0) {
+
                             $storeurl = "http://store.steampowered.com/api/appdetails?appids=$appID";
                             $storeinfo = json_decode(file_get_contents($storeurl), true);
 
                             $d = $storeinfo[$appID]["data"];
-                            //print_r($d);
+                            print_r($storeinfo);
 
                             echo "got store data ..";
                             $app['name'] = $d['name'];
@@ -136,16 +177,16 @@ class urlreveal extends module
 
                             $app["metacritic"]["score"] = $d["metacritic"]["score"];
 
-
+                            $cur = ($d['price_overview']['currency'] == "EUR" ? "€" : ($d['price_overview']['currency'] == "USD" ? "$" : $d['price_overview']['currency']));
                             if ($d['price_overview']['initial'] > $d['price_overview']['final']) {
                                 // app is on sale
-                                $cur = ($d['price_overview']['currency'] == "EUR" ? "€" : ($d['price_overview']['currency'] == "USD" ? "$" : $d['price_overview']['currency']));
+
                                 $price = "On sale " . round($d['price_overview']['final'] / 100, 2) . "$cur";
                                 $onsale = " (Save " . $d['price_overview']['discount_percent'] . "% - Down from " . round($d['price_overview']['initial'] / 100, 2) . "$cur)";
 
                             } else {
                                 // no discount
-                                $cur = ($d['price_overview']['currency'] == "EUR" ? "€" : ($d['price_overview']['currency'] == "USD" ? "$" : $d['price_overview']['currency']));
+
                                 if ($d['price_overview']['final'] == 0)
                                     $price = "Free To Play";
                                 else
@@ -187,16 +228,13 @@ class urlreveal extends module
                                 $pub = $d['publishers'][0] . "/" . $d['developers'][0];
 
 
-
-
-                            $title = $pub . " Presents " . ($d["type"] == "dlc" ? "[".$d["fullgame"]["name"]."/DLC] ".str_replace($d["fullgame"]["name"].":", "",$app["name"]) : $app["name"]) .$onsale;
+                            $title = $pub . " Presents " . ($d["type"] == "dlc" ? "[" . $d["fullgame"]["name"] . "/DLC] " . str_replace($d["fullgame"]["name"] . ":", "", $app["name"]) : $app["name"]) . $onsale;
 
                             if (strlen($d['website']) > 0)
-                                $www = " 7Website: ".$d['website'];
+                                $www = " 7Website: " . $d['website'];
 
 
-
-                            $sumup = (strlen($app["cat"])>0 ? "7Cat: $app[cat] - " : "")."7Platform: $app[platform] - 7Genre: $app[genre] - 7Price: " . $price.$www;
+                            $sumup = (strlen($app["cat"]) > 0 ? "7Cat: $app[cat] - " : "") . "7Platform: $app[platform] - 7Genre: $app[genre] - 7Price: " . $price . $www;
                         }
                     }
 
@@ -220,12 +258,12 @@ class urlreveal extends module
  */
 
 
-                    $wasted = $res[connection] + $res[redirtime];
+                    $wasted = $res['connection'] + $res['redirtime'];
                     $this->ircClass->privMsg($channel, "7URL $urlinfo 7Title: $title - 7Speed: " .
-                        $this->mksize($res[size]) . "@" . $this->mksize($res["speed"]) .
+                        $this->mksize($res['size']) . "@" . $this->mksize($res["speed"]) .
                         "/s 15 other stats [type: $res[type] / dns-lookup: $res[dnslookup] / wasted: $wasted]");
 
-                    if (strlen($sumup) >= 2 and strlen($sumup) <= 512)
+                    if (strlen(@$sumup) >= 2 and strlen(@$sumup) <= 512)
                         $this->ircClass->privMsg($channel, "$sumup");
                 }
         }
@@ -273,8 +311,7 @@ class urlreveal extends module
         $ret["type"] = curl_getinfo($crl, CURLINFO_CONTENT_TYPE);
 
         $ret["redirtime"] = number_format(curl_getinfo($crl, CURLINFO_REDIRECT_TIME), 2);
-        $ret["dnslookup"] = number_format(curl_getinfo($crl, CURLINFO_NAMELOOKUP_TIME),
-            2);
+        $ret["dnslookup"] = number_format(curl_getinfo($crl, CURLINFO_NAMELOOKUP_TIME), 2);
         $ret["connection"] = number_format(curl_getinfo($crl, CURLINFO_CONNECT_TIME), 2);
 
         curl_close($crl);

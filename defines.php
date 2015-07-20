@@ -109,6 +109,14 @@ if ($OS == 'unknown') {
     define('EINPROGRESS', 150);    /* Operation now in progress */
 }
 
+
+// Time & date
+
+define('FULL_DATE_STRING_FORMAT', 'd/m/Y H:i:s');
+define('DATETIME_STRING_FORMAT', 'd/m/Y H:i:s');
+define('DATE_STRING_FORMAT', 'd/m/Y');
+define('TIME_STRING_FORMAT', 'H:i:s');
+
 // Version Definition
 define('VERSION', '2.2.3');
 define('VERSION_DATE', '20/07/2015');

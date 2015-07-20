@@ -2120,12 +2120,23 @@ class irc
     {
         $network = $this->getServerConf('Network') == "" ? $this->getClientConf('server') : $this->getServerConf('Network');
 
-        if (DEBUG == 1) {
-            echo "[" . date("h:i:s") . "] " . "({$this->nick}@$network) > " . $data . "\n";
-        } else {
-            if ($this->getClientConf('logfile') != "") {
-                error_log("[" . date("h:i:s") . "] " . "({$this->nick}@$network) > " . $data . "\n", 3, $this->getClientConf('logfile'));
-            }
+        $lineToLog = "[".date(TIME_STRING_FORMAT)."] " . "({$this->nick}@$network) > " . $data . "\n";
+
+        if (DEBUG == 1)
+        {
+            echo $lineToLog;
+        }
+
+        if ($this->getClientConf('logdir') != "")
+        {
+            if ($this->getClientConf('logfile') != "")
+                error_log($lineToLog, 3, $this->getClientConf('logdir').$this->getClientConf('logfile').date('Y-m-d').'.log');
+            else
+                error_log($lineToLog, 3, $this->getClientConf('logdir').date('Y-m-d').'.log');
+        }
+        elseif ($this->getClientConf('logfile') != "")
+        {
+            error_log($lineToLog, 3, $this->getClientConf('logfile'));
         }
     }
 

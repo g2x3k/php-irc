@@ -1,7 +1,5 @@
 <?php
-// -hook for the .conf
-// privmsg urlreveal priv_urlreveal
-// -see bottom for version history & todo
+
 class urlreveal extends module
 {
 
@@ -38,7 +36,6 @@ class urlreveal extends module
         $skipchan[] = "#coders2";
         $skipchan[] = "#addpre.backfill";
 
-
         if (in_array($channel, $skipchan))
             return;
 
@@ -54,25 +51,25 @@ class urlreveal extends module
             $url = $matches[0];
             $res = $this->get_url_contents("$url"); // get url contents
 
+            $nurl = urldecode($res["url"]); // set new "niceurl"
 
-            /*if (!preg_match("/<title()>/i", $res["html"]))
-                $title = "NO FkInG <TiTLE> WeB 2.0 Now without title tags ...";
-            else
-                $title = html_entity_decode($this->extractstring("<title>", "<\/title>", $res["html"])); //extract the title
-            */
+            $temp = parse_url($url);
+            $host = $temp["host"];
+            // who to blame when we dont have title ;)
+            $blame = explode(".", $host);
+            $blame = $blame[count($blame) - 2];
 
             $dom = new DOMDocument();
             libxml_use_internal_errors(true);
             $dom->loadHTML($res["html"]);
 
+
             $list = $dom->getElementsByTagName("title");
             if ($list->length > 0)
                 $title = html_entity_decode(str_replace(array("\n", '\r'), "", $list->item(0)->textContent));
-            else
-                $title = "NO FkInG <TiTLE> WeB 2.0 Now without title tags ...";
 
-
-            $nurl = urldecode($res["url"]); // set new "niceurl"
+            if (strlen($title) == 0)
+                $title = "NO FkInG <TiTLE> WeB 2.0 Now without title tags ... good job $blame";
 
             if (preg_match("/image/i", $res["type"])) {
                 // url is image return img stats
@@ -86,7 +83,7 @@ class urlreveal extends module
                 if ($surl != $nsurl)
                     $urlinfo = "$surl redirects to $nsurl";
                 else
-                    $urlinfo = "$surl";
+                    $urlinfo = "$nhost";
 
                 $myFile = "tmpimg";
                 $fh = fopen($myFile, 'w');
@@ -99,14 +96,12 @@ class urlreveal extends module
                     "$height in " . mksize($res[size]) . " 7Speed: " . $this->mksize($res["speed"]) .
                     "/s 15 other stats [type $res[type] / dns-lookup $res[dnslookup] / wasted $res[connection] + $res[redirtime]]");
                 unlink("tmpimg");
-            } else
+            } else {
                 if ($title) { // if we got a title its a page return info
                     $urlstrip = array("http://", "www.", "https://", "HTTP://", "WWW.", "HTTPS://"); // stripcode to make urls nice
-                    //todo nice url formatting
-                    if (strlen($title) < 4)
-                        return false;
-                    if (strlen($title) > 256)
-                        return false;
+
+                    if (strlen($title) > 185)
+                        return false; // omg, nononononno
 
                     $surl = substr(str_replace($urlstrip, "", $url), 0, 22);
                     $nsurl = substr(str_replace($urlstrip, "", $nurl), 0, 22);
@@ -256,7 +251,7 @@ class urlreveal extends module
                         $title = $data->title . " - 1,0 You0,4tube ";
 
                         if ($data->title != $data->description)
-                        $sumup = "7Description: ".$data->description;
+                            $sumup = "7Description: " . $data->description;
 
                     }
 
@@ -269,6 +264,7 @@ class urlreveal extends module
                     if (strlen(@$sumup) >= 2 and strlen(@$sumup) <= 512)
                         $this->ircClass->privMsg($channel, "$sumup");
                 }
+            }
         }
     }
 
@@ -347,4 +343,5 @@ class urlreveal extends module
             return number_format($bytes / 1099511627776, 2) . " TB";
     }
 }
+
 ?>

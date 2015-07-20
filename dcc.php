@@ -2,15 +2,19 @@
 
 /*
 +---------------------------------------------------------------------------
-|   PHP-IRC v2.2.1 Service Release
+|   PHP-IRC v2.2.3 Service Release
 |   ========================================================
 |   by Manick
 |   (c) 2001-2005 by http://www.phpbots.org/
 |   Contact: manick@manekian.com
 |   irc: #manekian@irc.rizon.net
 |   ========================================
+|   Maintained by g2x3k
+|   2011-2015 https://github.com/g2x3k/php-irc
+|   contant: g2x3k@layer13.net
+|   irc: #root @ irc.layer13.net:+7000
 +---------------------------------------------------------------------------
-|   > dcc module
+|   > remote class module
 |   > Module written by Manick
 |   > Module Version Number: 2.2.0
 +---------------------------------------------------------------------------
@@ -31,8 +35,9 @@
 |   Changes
 |   =======-------
 |   > If you wish to suggest or submit an update/change to the source
-|   > code, email me at manick@manekian.com with the change, and I
-|   > will look to adding it in as soon as I can.
+|   > code, post a pull request or issue on github and i will into it
+|   > https://github.com/g2x3k/php-irc
+|   >                                            maintained by g2x3k
 +---------------------------------------------------------------------------
 */
 

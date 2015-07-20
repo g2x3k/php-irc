@@ -154,6 +154,8 @@ class urlreveal extends module
                             if ($this->conf["steam_bundledetails"] == "count")
                                 $included = count($storeinfo['apps']) . " Games";
 
+
+                            $title = $storeinfo['name']. "$onsale";
                             $sumup = "7Price: $price$onsale 7Includes: $included";
 
                         }

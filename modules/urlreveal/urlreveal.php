@@ -62,6 +62,9 @@ class urlreveal extends module
             else
                 $title = html_entity_decode($this->extractstring("<title>", "<\/title>", $res["html"])); //extract the title
 
+
+
+
             $nurl = urldecode($res["url"]); // set new "niceurl"
 
             if (preg_match("/image/i", $res["type"])) {
@@ -90,7 +93,8 @@ class urlreveal extends module
                 $this->ircClass->privMsg($channel, "image url ($urlinfo) imgsize $width" . "x" .
                     "$height in " . mksize($res[size]) . " 7Speed: " . $this->mksize($res["speed"]) .
                     "/s 15 other stats [type $res[type] / dns-lookup $res[dnslookup] / wasted $res[connection] + $res[redirtime]]");
-            } else
+            }
+            else
                 if ($title) { // if we got a title its a page return info
                     $urlstrip = array("http://", "www.", "https://", "HTTP://", "WWW.", "HTTPS://"); // stripcode to make urls nice
                     //todo nice url formatting
@@ -99,25 +103,22 @@ class urlreveal extends module
                     if (strlen($title) > 256)
                         return false;
 
-                    $surl = substr(str_replace($urlstrip, "", $url), 0, 18);
-                    $nsurl = substr(str_replace($urlstrip, "", $nurl), 0, 18);
+                    $surl = substr(str_replace($urlstrip, "", $url), 0, 22);
+                    $nsurl = substr(str_replace($urlstrip, "", $nurl), 0, 22);
                     if ($surl[strlen($surl) - 1] == "/")
-                        $surl = substr($surl, 0, strlen($surl) - 1); // remove trailing slash
+                        $surl = substr($surl, 0, strlen($surl) - 1);
                     if ($nsurl[strlen($nsurl) - 1] == "/")
-                        $nsurl = substr($nsurl, 0, strlen($nsurl) - 1); // -||-
+                        $nsurl = substr($nsurl, 0, strlen($nsurl) - 1);
 
-                    if ($surl != $nsurl) // check for redirects and set urlinfo
+                    if (trim($surl) != trim($nsurl))
+                        $urlinfo = "$surl redirects to $nsurl";
+                    else $urlinfo = "$surl";
 
-                        $urlinfo = "$surl redirects too $nsurl / $nsurl"; // -||-
-                    else // -||-
+                    // extensions/plugins ...
 
-                        $urlinfo = "$surl"; // -||-
+                    // Steam store .
 
-                    // extensions ...
-
-                    // Steam store ... not working yet ...
-
-                    if (preg_match("/store.steampowered.com/i", $url)) {
+                    if (preg_match("/store.steampowered.com(\/app|\/agecheck\/app)/i", $url)) {
                         echo "STEAM STORE URL\n";
                         $appID = preg_match("/\/([0-9]+)/i", $url, $matches);
                         $appID = (int)trim($matches[1]);

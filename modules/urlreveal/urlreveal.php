@@ -202,7 +202,7 @@ class urlreveal extends module
                      }
  */
 
-                    $et = rtrxtime($exectimer);
+                    //$et = rtrxtime($exectimer);
                     $wasted = $res[connection] + $res[redirtime];
                     $this->ircClass->privMsg($channel, "7URL ($urlinfo) - 7Title: $title - 7Speed: " .
                         $this->mksize($res[size]) . "@" . $this->mksize($res["speed"]) .

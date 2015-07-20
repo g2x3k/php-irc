@@ -2125,7 +2125,8 @@ class irc
 
         if (DEBUG == 1) {
             echo "[" . date("h:i:s") . "] " . "({$this->nick}@$network) > " . $data . "\n";
-        } else {
+        }
+        else {
             if ($this->getClientConf('logfile') != "") {
                 error_log("[" . date("h:i:s") . "] " . "({$this->nick}@$network) > " . $data . "\n", 3, $this->getClientConf('logfile'));
             }

@@ -1863,7 +1863,6 @@ class irc
         }
     }
 
-
     public function maintainChannel($channel, $key = "")
     {
         $channel = $this->myStrToLower($channel);
@@ -1875,10 +1874,12 @@ class irc
         $channels = implode(',',array_keys($this->getChannelData()));
         $this->privMsg($channels, $msg, $queue);
     }
+
     public function partChannel($chan)
     {
         $this->pushAfter($this->clientFormat("PART " . $chan));
     }
+
     public function joinChannel($chan)
     {
         $this->pushBefore($this->clientFormat("JOIN " . $chan));
@@ -1890,7 +1891,6 @@ class irc
         $this->tempNick = $nick;
     }
 
-
     private function parseServerConfig()
     {
         $args = explode(chr(32), $this->lVars['params']);
@@ -1900,9 +1900,7 @@ class irc
             if (strpos($arg, "=") === false) {
                 $arg .= "=1";
             }
-
             $argParts = explode("=", $arg);
-
             $this->serverConfig[$argParts[0]] = $argParts[1];
 
         }
@@ -1912,7 +1910,6 @@ class irc
     {
         return array("USER" => "*", "TEXT" => $text);
     }
-
 
     public function removeQueues($nick)
     {
@@ -1924,8 +1921,6 @@ class irc
                 $this->textQueueLength--;
             }
         }
-
-
     }
 
     public function getStats()
@@ -2128,6 +2123,15 @@ class irc
     {
         $network = $this->getServerConf('Network') == "" ? $this->getClientConf('server') : $this->getServerConf('Network');
 
+        if (DEBUG == 1) {
+            echo "[" . date("h:i:s") . "] " . "({$this->nick}@$network) > " . $data . "\n";
+        } else {
+            if ($this->getClientConf('logfile') != "") {
+                error_log("[" . date("h:i:s") . "] " . "({$this->nick}@$network) > " . $data . "\n", 3, $this->getClientConf('logfile'));
+            }
+        }
+    }
+    /*
         $lineToLog = "[".date(TIME_STRING_FORMAT)."] " . "({$this->nick}@$network) > " . $data . "\n";
 
         if (DEBUG == 1)
@@ -2147,7 +2151,7 @@ class irc
             error_log($lineToLog, 3, $this->getClientConf('logfile'));
         }
     }
-
+     */
     public function getUsageList()
     {
         return $this->usageList;

@@ -1,14 +1,10 @@
 <?
-
-
 class joke_mod extends module
 {
-
     public $title = "simple joke trigger";
     public $author = "g2x3k";
     public $version = "0.1";
     private $delay = 0;
-
 
     public function init()
     {
@@ -19,7 +15,6 @@ class joke_mod extends module
     {
         $channel = $line["to"];
         $nick = $line["fromNick"];
-
 
         $data = get_url_contents("http://api.icndb.com/jokes/random");
         $data = $data["html"];

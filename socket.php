@@ -13,7 +13,7 @@
 |   contant: g2x3k@layer13.net
 |   irc: #root @ irc.layer13.net:+7000
 +---------------------------------------------------------------------------
-|   > remote class module
+|   > socket class module
 |   > Module written by Manick
 |   > Module Version Number: 2.2.0
 +---------------------------------------------------------------------------

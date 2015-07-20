@@ -1870,7 +1870,11 @@ class irc
         $this->maintainChannels[] = array('CHANNEL' => $channel, 'KEY' => $key);
     }
 
-
+    public function amsg($msg, $queue = 1)
+    {
+        $channels = implode(',',array_keys($this->getChannelData()));
+        $this->privMsg($channels, $msg, $queue);
+    }
     public function partChannel($chan)
     {
         $this->pushAfter($this->clientFormat("PART " . $chan));

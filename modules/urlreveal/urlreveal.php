@@ -11,7 +11,7 @@ class urlreveal extends module
 
     public function init()
     {
-        // Channels To ignore *lowercase
+        // Channels To ignore
         $this->conf["ignore"]["chans"][] = "#addpre";
         $this->conf["ignore"]["chans"][] = "#addpre.info";
         $this->conf["ignore"]["chans"][] = "#addpre.ftp";
@@ -21,7 +21,7 @@ class urlreveal extends module
         $this->conf["ignore"]["chans"][] = "#coders";
         $this->conf["ignore"]["chans"][] = "#coders2";
         $this->conf["ignore"]["chans"][] = "#addpre.backfill";
-        // Nicks to ignore *lowercase
+        // Nicks to ignore
         $this->conf["ignore"]["nicks"][] = "layer13";
         $this->conf["ignore"]["nicks"][] = "l13a";
         $this->conf["ignore"]["nicks"][] = "l13d";
@@ -39,19 +39,15 @@ class urlreveal extends module
         $text = $line['text'];
         $fromNick = $line['fromNick'];
 
-
-
         //failsafes
         if (strpos($channel, "#") === false)
             return;
 
-        if (in_array(strtolower($channel), $this->conf["ignore"]["chans"]))
+        if (preg_grep("/$channel/i", $this->conf["ignore"]["chans"]))
             return;
 
-        if (in_array(strtolower($fromNick), $this->conf["ignore"]["nicks"]))
+        if (preg_grep("/$fromNick/i", $this->conf["ignore"]["nicks"]))
             return;
-
-
 
         $preg = "(((ht){1}tp(s|):\/\/|www\.)[-a-zA-Z0-9@:%_\+.~#?&\/\/=]+)"; //regex for url reconizing
         if (preg_match("/$preg/i", $text, $matches)) { // fix better url reconizing

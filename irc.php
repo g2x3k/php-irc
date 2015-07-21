@@ -1236,7 +1236,7 @@ class irc
                 break;
 
             case 381:
-                    $this->IRCOP = true;
+                $this->IRCOP = true;
                 break;
 
             case 401:
@@ -1660,7 +1660,7 @@ class irc
                 break;
 
             case "time":
-                $msg =  "TIME ".date("D M d H:i:s Y");
+                $msg = "TIME " . date("D M d H:i:s Y");
                 break;
 
             case "uptime":
@@ -1871,7 +1871,7 @@ class irc
 
     public function amsg($msg, $queue = 1)
     {
-        $channels = implode(',',array_keys($this->getChannelData()));
+        $channels = implode(',', array_keys($this->getChannelData()));
         $this->privMsg($channels, $msg, $queue);
     }
 
@@ -2125,13 +2125,13 @@ class irc
 
         if (DEBUG == 1) {
             echo "[" . date("h:i:s") . "] " . "({$this->nick}@$network) > " . $data . "\n";
-        }
-        else {
+        } else {
             if ($this->getClientConf('logfile') != "") {
                 error_log("[" . date("h:i:s") . "] " . "({$this->nick}@$network) > " . $data . "\n", 3, $this->getClientConf('logfile'));
             }
         }
     }
+
     /*
         $lineToLog = "[".date(TIME_STRING_FORMAT)."] " . "({$this->nick}@$network) > " . $data . "\n";
 
@@ -2162,6 +2162,7 @@ class irc
     {
         $host = $line['fromHost'];
 
+
         if (!array_key_exists($host, $this->usageList)) {
             $this->usageList[$host] = new usageLink;
             $this->usageList[$host]->isBanned = false;
@@ -2169,29 +2170,33 @@ class irc
             $this->usageList[$host]->timesUsed = 1;
             $user = $this->usageList[$host];
         } else {
+
+
+            if (!$this->getClientConf('floodcheck'))
+                return STATUS_NOT_BANNED;
+
             $user = $this->usageList[$host];
-            $floodcheck = $this->getClientConf('floodcheck');
-
-            if ($floodcheck == true) {
-                $floodTime = intval($this->getClientConf('floodtime'));
-                if ($floodTime <= 0) {
-                    $floodTime = 60;
-                }
-
-                if ($user->isBanned == true) {
-                    if ($user->timeBanned > time() - $floodTime) {
-                        return STATUS_ALREADY_BANNED;
-                    }
-                    $user->isBanned = false;
-                }
 
 
-                if ($user->lastTimeUsed < time() - 10) {
-                    $user->timesUsed = 0;
-                }
-                $user->lastTimeUsed = time();
-                $user->timesUsed++;
+            $floodTime = intval($this->getClientConf('floodtime'));
+            if ($floodTime <= 0) {
+                $floodTime = 60;
             }
+
+            if ($user->isBanned == true) {
+                if ($user->timeBanned > time() - $floodTime) {
+                    return STATUS_ALREADY_BANNED;
+                }
+                $user->isBanned = false;
+            }
+
+
+            if ($user->lastTimeUsed < time() - 10) {
+                $user->timesUsed = 0;
+            }
+            $user->lastTimeUsed = time();
+            $user->timesUsed++;
+
             $numLines = intval($this->getClientConf('floodlines'));
             if ($numLines <= 0) {
                 $numLines = 5;
@@ -2205,6 +2210,7 @@ class irc
                 $this->removeQueues($line['fromNick']);
                 return STATUS_JUST_BANNED;
             }
+
         }
         return STATUS_NOT_BANNED;
     }

@@ -671,6 +671,8 @@ class parser
                 $cmdLower = irc::myStrToLower($args['cmd']);
                 if (isset($this->cmdList['priv'][$cmdLower])) {
                     if ($this->cmdList['priv'][$cmdLower]['active'] == true) {
+
+
                         $theCase = $this->ircClass->floodCheck($line);
 
                         switch ($theCase) {
@@ -683,9 +685,11 @@ class parser
                                 $module = $this->cmdList['priv'][$cmdLower]['module'];
                                 $class = $this->cmdList['file'][$module]['class'];
 
+                                /*
                                 if ($this->ircClass->getTextQueueLength() > 5) {
                                     $this->ircClass->notice($line['fromNick'], "Request Queued.  Please wait " . $this->ircClass->getTextQueueLength() . " seconds for your data.", 0);
                                 }
+                                */
 
                                 $class->$func($line, $args);
                                 break;

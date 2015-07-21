@@ -11,7 +11,6 @@ fastest way to get the bot up and running:
 ```
 
 thats it shuld be up and running now (tested on debian 7/8) 
-
 note: some modules requires php5-curl and if you want to use database make sure to install driver for that php5-mysqlnd etc :)
 
 ### enable/disable mods

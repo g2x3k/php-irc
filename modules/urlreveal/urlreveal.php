@@ -11,6 +11,23 @@ class urlreveal extends module
 
     public function init()
     {
+        // Channels To ignore
+        $this->conf["ignore"]["chans"][] = "#addpre";
+        $this->conf["ignore"]["chans"][] = "#addpre.info";
+        $this->conf["ignore"]["chans"][] = "#addpre.ftp";
+        $this->conf["ignore"]["chans"][] = "#addpre.ext2";
+        $this->conf["ignore"]["chans"][] = "#addpre.ext";
+        $this->conf["ignore"]["chans"][] = "#addt";
+        $this->conf["ignore"]["chans"][] = "#coders";
+        $this->conf["ignore"]["chans"][] = "#coders2";
+        $this->conf["ignore"]["chans"][] = "#addpre.backfill";
+        // Nicks to ignore
+        $this->conf["ignore"]["nicks"][] = "Layer13";
+        $this->conf["ignore"]["nicks"][] = "L13A";
+        $this->conf["ignore"]["nicks"][] = "L13D";
+        $this->conf["ignore"]["nicks"][] = "L13C";
+
+
         $this->conf["youtube_apikey"] = "AIzaSyDtmgm9nJRQhWg4j1SetCH-vDMZ3_UZfK0"; // to get your own key, create a project at https://console.developers.google.com to get apikey "bs google"
         $this->conf["steam_bundledetails"] = "count"; // can be list or count (warning: list can be loooong)
     }
@@ -25,25 +42,12 @@ class urlreveal extends module
         if (strpos($channel, "#") === false)
             return;
 
-        // list of channels to skip url lookup´s in
-        $skipchan[] = "#addpre";
-        $skipchan[] = "#addpre.info";
-        $skipchan[] = "#addpre.ftp";
-        $skipchan[] = "#addpre.ext2";
-        $skipchan[] = "#addpre.ext";
-        $skipchan[] = "#addt";
-        $skipchan[] = "#coders";
-        $skipchan[] = "#coders2";
-        $skipchan[] = "#addpre.backfill";
-
-        if (in_array($channel, $skipchan))
+        if (in_array($channel, $this->conf["ignore"]["chans"]))
+            return;
+        if (in_array($fromnick, $this->conf["ignore"]["nicks"]))
             return;
 
-        if ($fromnick == "thorbits" or $fromnick == "thb") // ignored nicks
-            return;
 
-        if (preg_match("/(#dontdointhischan|#orthis)/i", $channel))
-            return;
 
         $preg = "(((ht){1}tp(s|):\/\/|www\.)[-a-zA-Z0-9@:%_\+.~#?&\/\/=]+)"; //regex for url reconizing
         if (preg_match("/$preg/i", $text, $matches)) { // fix better url reconizing

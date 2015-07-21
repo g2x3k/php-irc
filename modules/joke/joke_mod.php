@@ -1,4 +1,5 @@
-<?
+<?php
+
 class joke_mod extends module
 {
     public $title = "simple joke trigger";

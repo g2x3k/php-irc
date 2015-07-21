@@ -40,7 +40,6 @@ class urlreveal extends module
             return;
 
         if ($fromnick == "thorbits" or $fromnick == "thb") // ignored nicks
-
             return;
 
         if (preg_match("/(#dontdointhischan|#orthis)/i", $channel))

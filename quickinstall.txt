@@ -1,10 +1,10 @@
 Linux beginner steps:
-apt-get install php5 php5-cli mysql-server
+apt-get install php5-cli
 git clone git://github.com/g2x3k/php-irc.git
 
-enter the php-irc die
+enter the php-irc dir
 now just have to edit the bot.conf file 
-to start the bot type: php -f bot.php bot.conf
+to start the bot type: php bot.php bot.conf
 
 
 Windows Beginner:

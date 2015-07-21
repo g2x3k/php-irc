@@ -1,4 +1,4 @@
-<?
+<?php
 
 class blackjack_mod extends module
 {

@@ -1,4 +1,5 @@
-<?
+<?php
+
 class serve_mod extends module {
 
 	public $title = "iRC SerVe";

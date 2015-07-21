@@ -1,5 +1,5 @@
 #!/usr/bin/php5
-<?
+<?php
 include_once("modules/wp_mod/userparse.inc");
 function TextBetween($s1,$s2,$s){
   $s1 = strtolower($s1);

@@ -48,27 +48,32 @@ class github_mod extends module
                 return;
             }
 
-            $this->ircClass->privMsg($channel , (isset($data->pull_request) ? 'Pull request' : 'Issue') . ' #' . $data->number . ': ' . $data->title . ' (' . $data->comments . ' comment(s))');
-            $this->ircClass->privMsg($channel , 'Reported by ' . $data->user->login . ', current status: ' . $data->state);
-            $this->ircClass->privMsg($channel , substr(preg_replace('/\s\s+/', ' ', $data->body), 0, 250));
-            $this->ircClass->privMsg($channel , 'More information: ' . $data->html_url);
-        }
-        else {
-            $this->ircClass->privMsg($channel , "Sending last 5 issue for $repo in privmsg");
+            $this->ircClass->privMsg($channel, (isset($data->pull_request) ? 'Pull request' : 'Issue') . ' #' . $data->number . ': ' . $data->title . ' (' . $data->comments . ' comment(s))');
+            $this->ircClass->privMsg($channel, 'Reported by ' . $data->user->login . ', current status: ' . $data->state);
+            $this->ircClass->privMsg($channel, substr(preg_replace('/\s\s+/', ' ', $data->body), 0, 250));
+            $this->ircClass->privMsg($channel, 'More information: ' . $data->html_url);
+        } else {
+
             $url = 'https://api.github.com/repos/' . str_replace('%2F', '/', urlencode($repo)) . '/issues';
 
             $data = get_url_contents($url);
             $result = json_decode($data["html"]);
 
             $i = 0;
-            foreach ($result as $issue) {
-                if ($i >= 5)
-                    break;
+            if (count($result)) {
+                $this->ircClass->privMsg($channel, "Sending last 5 issue for $repo in privmsg");
 
-                $this->ircClass->privMsg($channel , (isset($issue->pull_request) ? '[Pull]' : '[Issue]') . ' #' . $issue->number . ': ' . $issue->title . ' (reported by ' . $issue->user->login . ', status: ' . $issue->state . ') <' . $issue->html_url . '>');
+                foreach ($result as $issue) {
+                    if ($i >= 5)
+                        break;
 
-                $i++;
+                    $this->ircClass->privMsg($nick, (isset($issue->pull_request) ? '[Pull]' : '[Issue]') . ' #' . $issue->number . ': ' . $issue->title . ' (reported by ' . $issue->user->login . ', status: ' . $issue->state . ') <' . $issue->html_url . '>');
+
+                    $i++;
+                }
             }
+            else
+                $this->ircClass->privMsg($channel, "no issues to display for $repo");
         }
     }
 }

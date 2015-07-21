@@ -11,7 +11,7 @@ class urlreveal extends module
 
     public function init()
     {
-        // Channels To ignore
+        // Channels To ignore *lowercase
         $this->conf["ignore"]["chans"][] = "#addpre";
         $this->conf["ignore"]["chans"][] = "#addpre.info";
         $this->conf["ignore"]["chans"][] = "#addpre.ftp";
@@ -21,11 +21,11 @@ class urlreveal extends module
         $this->conf["ignore"]["chans"][] = "#coders";
         $this->conf["ignore"]["chans"][] = "#coders2";
         $this->conf["ignore"]["chans"][] = "#addpre.backfill";
-        // Nicks to ignore
-        $this->conf["ignore"]["nicks"][] = "Layer13";
-        $this->conf["ignore"]["nicks"][] = "L13A";
-        $this->conf["ignore"]["nicks"][] = "L13D";
-        $this->conf["ignore"]["nicks"][] = "L13C";
+        // Nicks to ignore *lowercase
+        $this->conf["ignore"]["nicks"][] = "layer13";
+        $this->conf["ignore"]["nicks"][] = "l13a";
+        $this->conf["ignore"]["nicks"][] = "l13d";
+        $this->conf["ignore"]["nicks"][] = "l13c";
 
 
         $this->conf["youtube_apikey"] = "AIzaSyDtmgm9nJRQhWg4j1SetCH-vDMZ3_UZfK0"; // to get your own key, create a project at https://console.developers.google.com to get apikey "bs google"
@@ -34,17 +34,21 @@ class urlreveal extends module
 
     public function priv_urlreveal($line, $args)
     {
-        $exectimer = xtimer(); // started timer
+
         $channel = $line['to'];
         $text = $line['text'];
-        $fromnick = strtolower($line['fromNick']);
+        $fromNick = $line['fromNick'];
+
+
+
         //failsafes
         if (strpos($channel, "#") === false)
             return;
 
-        if (in_array($channel, $this->conf["ignore"]["chans"]))
+        if (in_array(strtolower($channel), $this->conf["ignore"]["chans"]))
             return;
-        if (in_array($fromnick, $this->conf["ignore"]["nicks"]))
+
+        if (in_array(strtolower($fromNick), $this->conf["ignore"]["nicks"]))
             return;
 
 
@@ -226,8 +230,10 @@ class urlreveal extends module
                             else
                                 $pub = $d['publishers'][0] . "/" . $d['developers'][0];
 
+                            // pre purchase ?
+                            $pre = ($d["release_date"]["coming_soon"] == 1 ? "(Pre-Purchase, Avaible ".$d['release_date']['date'].") ": "");
 
-                            $title = $pub . " Presents " . ($d["type"] == "dlc" ? "[" . $d["fullgame"]["name"] . "/DLC] " . str_replace($d["fullgame"]["name"] . ":", "", $app["name"]) : $app["name"]) . $onsale;
+                            $title = $pub . " Presents " . $pre.($d["type"] == "dlc" ? "[" . $d["fullgame"]["name"] . "/DLC] " . str_replace($d["fullgame"]["name"] . ":", "", $app["name"]) : $app["name"]) . $onsale;
 
                             if (strlen($d['website']) > 0)
                                 $www = " 7Website: " . $d['website'];

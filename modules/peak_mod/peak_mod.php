@@ -45,8 +45,11 @@ class peak_mod extends module {
             $this->peak->setIniVal($chan, "peak", $chanData->count);
             $this->peak->setIniVal($chan, "time", time());
             $this->peak->writeIni();
+
+            // only allow peak announces in root, uncomment next two lines to allow everywhere channel bot is in
             if ($chan != "#root")
                 return;
+
             $this->ircClass->privMsg($chan, "New PEAK for $chan: ".$chanData->count." ");
         }
     }

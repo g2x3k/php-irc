@@ -168,12 +168,7 @@ pip-log.txt
 ## other stuff
 ################
 *.log
-peak.ini
-*peak.ini
-modules/peak_mod/peak.ini
 seen.ini
-
-
 
 ################
 ## Own Crap

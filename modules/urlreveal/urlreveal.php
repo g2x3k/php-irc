@@ -34,7 +34,7 @@ class urlreveal extends module
 
     public function priv_urlreveal($line, $args)
     {
-        
+
 
         $channel = $line['to'];
         $text = $line['text'];
@@ -240,8 +240,8 @@ class urlreveal extends module
                         }
                     }
 
-
-                    if (preg_match("/youtube/i", $title)) {
+                    // youtube
+                    if (preg_match("/youtube\.com/i", $url)) {
                         // api override for youtube since have captha
                         $purl = parse_url($url);
                         $purl = explode("&", $purl["query"]);
@@ -258,6 +258,23 @@ class urlreveal extends module
 
                         if ($data->title != $data->description)
                             $sumup = "7Description: " . $data->description;
+
+                    }
+                    // imdb feel free to finnish this ...
+                    if (preg_match("/imdb.com\/title\/(tt[0-9]+)/i", $url, $match)) {
+                        $imdbid = $match[1];
+                        //
+                        $apiurl = "http://www.omdbapi.com/?i=$imdbid";
+                        $data = json_decode(file_get_contents($apiurl));
+                        print_r($data);
+                        if ($data->Type == "movie") {
+
+                        }
+
+                        if ($data->Type == "series") {
+
+                        }
+
 
                     }
 

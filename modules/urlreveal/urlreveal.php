@@ -34,6 +34,7 @@ class urlreveal extends module
 
     public function priv_urlreveal($line, $args)
     {
+        
 
         $channel = $line['to'];
         $text = $line['text'];

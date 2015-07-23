@@ -169,6 +169,7 @@ pip-log.txt
 ################
 *.log
 seen.ini
+peak.ini
 
 ################
 ## Own Crap

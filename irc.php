@@ -1157,12 +1157,13 @@ class irc
                 if ($this->tempNick != "") {
                     $this->nick = $this->tempNick;
                 }
-                // oper login
+
                 if ($this->getClientConf('operlogin') != "") {
                     $oper_string = "OPER " . $this->getClientConf('operlogin');
                     $validate = $this->clientFormat($oper_string);
                     $this->pushAfter($validate);
                 }
+
                 break;
 
             case 005:
@@ -1170,9 +1171,12 @@ class irc
                 if (!isset($this->modeArray) || !is_array($this->modeArray) || count($this->modeArray) <= 0) {
                     if ($this->getServerConf("CHANMODES") != "") {
                         $this->createModeArray();
-                        $this->checkChans();
 
-
+                        // delayed join
+                        if ($this->getClientConf('delayjoin') >= 1)
+                            $this->timerClass->addTimer("delayed_check_channels_timer", $this, "delayedCheckChans", "", $this->getClientConf('delayjoin'),false);
+                        else
+                            $this->checkChans();
                     }
                 }
                 break;
@@ -1792,6 +1796,11 @@ class irc
             }
 
         }
+    }
+
+    public function delayedCheckChans() { // quick hack to avoid it rerunning the checkchans when delayed join is set
+        $this->checkChans();
+        return false;
     }
 
     public function checkChans()

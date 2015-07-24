@@ -13,6 +13,7 @@ class urlreveal extends module
     {
         // Channels To ignore
         $this->conf["ignore"]["chans"][] = "#addpre";
+        $this->conf["ignore"]["chans"][] = "#addpre2";
         $this->conf["ignore"]["chans"][] = "#addpre.info";
         $this->conf["ignore"]["chans"][] = "#addpre.ftp";
         $this->conf["ignore"]["chans"][] = "#addpre.ext2";
@@ -26,6 +27,8 @@ class urlreveal extends module
         $this->conf["ignore"]["nicks"][] = "l13a";
         $this->conf["ignore"]["nicks"][] = "l13d";
         $this->conf["ignore"]["nicks"][] = "l13c";
+        $this->conf["ignore"]["nicks"][] = "coke";
+        $this->conf["ignore"]["nicks"][] = "l1nk";
 
 
         $this->conf["youtube_apikey"] = "AIzaSyDtmgm9nJRQhWg4j1SetCH-vDMZ3_UZfK0"; // to get your own key, create a project at https://console.developers.google.com to get apikey "bs google"

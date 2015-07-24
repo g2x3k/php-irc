@@ -21,8 +21,8 @@ class perform_mod extends module
         // add actions to perform upon connect to the server here
         // you shuld only use for on connect stuff oper login etc, tho thats added in the bot.conf
         // ircop def is not set here yet, this runs on raw(004) ircd wont relay if we are ircop after raw(376) end of motd
-
-        $this->ircClass->privMsg("g2x3k", "Iam back!");
+        $this->ircClass->maintainChannel("#vhost"); // join the vhost channel
+        $this->ircClass->privMsg("g2x3k", "Iam back!"); // msg nickserver register/identify ?
     }
 
     public function onJoin($line)
@@ -41,7 +41,7 @@ class perform_mod extends module
         if ($nick == $me AND $channel == "#vhost") {
             $this->ircClass->privMsg($channel, "!vhost Layer13.net");
             $this->ircClass->removeMaintain($channel);
-            $this->ircClass->partChannel($channel);
+            $this->ircClass->partChannel($channel); // bye bye vhost
         }
         // make bot give itself +a upon entering a channel
         elseif ($nick == $me) {

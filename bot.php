@@ -37,6 +37,7 @@
 |   > code, post a pull request or issue on github and i will into it
 |   > https://github.com/g2x3k/php-irc
 |   >                                            maintained by g2x3k
+|   > first commit
 +---------------------------------------------------------------------------
 */
 

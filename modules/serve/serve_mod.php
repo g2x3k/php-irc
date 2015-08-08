@@ -167,8 +167,8 @@ class serve_mod extends module {
 					else {
 						// else add
 						//$this->ircClass->privMsg("$chan", "not found in db ($nick - $address) .. adding");
-						$ires = $this->db->query("INSERT INTO `layer13`.`servestats` (`id`, `nick`, `address`, `type`, `last`, `today`, `total`, `channel`, `network`)
-						 VALUES (NULL, ".sqlesc($nick).", ".sqlesc($address).", ".sqlesc($trigger).", UNIX_TIMESTAMP(), '1', '1', ".sqlesc($chan).", ".sqlesc($network).");");
+$ires = mysql_query("INSERT INTO `predb`.`servestats` (`id`, `nick`, `nick2`, `nick3`, `address`, `type`, `last`, `today`, `total`, `channel`, `network`)
+						 VALUES (NULL, ".sqlesc($nick).", ".sqlesc($nick2).", ".sqlesc($nick3).", ".sqlesc($address).", ".sqlesc($trigger).", UNIX_TIMESTAMP(), '1', '1', ".sqlesc($chan).", ".sqlesc($network).");");
 					}
 				}
 

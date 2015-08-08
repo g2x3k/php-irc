@@ -60,6 +60,12 @@ class serve_mod extends module {
     	$this->serve["triggers"]["icecream"][] 	= "here [nick]... one ball for you only ([today]/[total]/[sumtotal])";
         $this->serve["triggers"]["icecream"][] 	= "finds a biig icecream for [nick] eat and you get for free (50$ to use toilet) ([today]/[total]/[sumtotal])";
         $this->serve["triggers"]["icecream"][] 	= "dusts off something that look like icecream from the corner of fridge, here [nick] ([today]/[total]/[sumtotal])";
+		
+//FUN
+		$this->serve["triggers"]["fun"][] = "stjæler [nick2]'s muldvarp og propper den i lommen på  [nick3]. Jeg har nakket en pung [today]. gang idag. Og jeg har prøvet så mange [total] gange. Alt i alt fik jeg den [sumtotal] gange";
+		$this->serve["triggers"]["fun"][] = "piller [nick2]'s hjul af bilen og forære dem til [nick3] ([today]/[total]/[sumtotal])";
+//END
+
 		// - docu:
 		// [nick] = nick that triggered, [today] how many heads/coffee person had today
 		// [total] = how many nick had it total, [last] time of last, [since] time since last
@@ -111,6 +117,8 @@ class serve_mod extends module {
 	public function priv_serve($line, $args) {
 		$chan = strtolower($line['to']);
 		$nick = $line['fromNick'];
+		$nick2 = $args["arg1"];
+		$nick3 = $args["arg2"];
 		$address = $line["fromIdent"]."@".$line["fromHost"];
 		$network = $this->ircClass->getServerConf ("NETWORK");
 
@@ -159,19 +167,19 @@ class serve_mod extends module {
 					else {
 						// else add
 						//$this->ircClass->privMsg("$chan", "not found in db ($nick - $address) .. adding");
-						$ires = $this->db->query("INSERT INTO `layer13`.`servestats` (`id`, `nick`, `address`, `type`, `last`, `today`, `total`, `channel`, `network`)
-						 VALUES (NULL, ".sqlesc($nick).", ".sqlesc($address).", ".sqlesc($trigger).", UNIX_TIMESTAMP(), '1', '1', ".sqlesc($chan).", ".sqlesc($network).");");
+$ires = mysql_query("INSERT INTO `predb`.`servestats` (`id`, `nick`, `nick2`, `nick3`, `address`, `type`, `last`, `today`, `total`, `channel`, `network`)
+						 VALUES (NULL, ".sqlesc($nick).", ".sqlesc($nick2).", ".sqlesc($nick3).", ".sqlesc($address).", ".sqlesc($trigger).", UNIX_TIMESTAMP(), '1', '1', ".sqlesc($chan).", ".sqlesc($network).");");
 					}
 				}
 
-				// grab info from db parse reply and return result
-				$ures = $this->db->query("SELECT * FROM servestats WHERE nick LIKE ".sqlesc($nick)." AND network LIKE '$network' AND type LIKE ".sqlesc($trigger)." LIMIT 1");
+// grab info from db parse reply and return result
+				$ures = mysql_query("SELECT * FROM servestats WHERE nick LIKE ".sqlesc($nick)." AND network LIKE '$network' AND type LIKE ".sqlesc($trigger)." LIMIT 1");
 				$urow = mysql_fetch_assoc($ures);
 				//grap totals
-				$tres = $this->db->query("SELECT sum(total) as sumtotal, sum(today) as sumtoday  FROM servestats WHERE network LIKE '$network' AND type LIKE ".sqlesc($trigger)." LIMIT 1");
+				$tres = mysql_query("SELECT sum(total) as sumtotal, sum(today) as sumtoday  FROM servestats WHERE network LIKE '$network' AND type LIKE ".sqlesc($trigger)." LIMIT 1");
 				$trow = mysql_fetch_assoc($tres);
 
-				$message = str_replace(array("[nick]", "[today]", "[total]", "[sumtotal]", "[sumtoday]"), array("$nick", $urow["today"], $urow["total"], $trow["sumtotal"],$trow["sumtoday"]), $reply);
+				$message = str_replace(array("[nick]", "[nick2]", "[nick3]", "[today]", "[total]", "[sumtotal]", "[sumtoday]"), array("$nick", "$nick2", "$nick3", $urow["today"], $urow["total"], $trow["sumtotal"],$trow["sumtoday"]), $reply);
 				//lookup nick or insert, update stats and reply
 				//$this->ircClass->privMsg("$chan", "trigger: $trigger - $reply @ $chan/$network");
 				$this->ircClass->privMsg("$chan", "$message");

@@ -9,7 +9,6 @@ class serve_mod extends module {
 	public function init() {
 		// init
 
-
 		// not working atm .. *TODO
 		$this->serve["settings"]["antispam"] = "1/3"; //1 trigger each 3 sec ...
 		$this->serve["settings"]["spamreplies"][] = "Hey hey there dont you think its going a bit to fast there only [since] since youre last ...";
@@ -18,25 +17,39 @@ class serve_mod extends module {
 		$this->serve["settings"]["dateformat"] = "h:i:s";
 		// config of avaible stuff for serving ...
 		
-		$this->serve["triggers"]["bar"] = "This Bar have: !coffee !bang !cola !beer !joint !head !mix !whisky !pipe !pussy !coke !icecream";
-		$this->serve["triggers"]["coke"] = "Are you stupid? We doesn't do shit like this... GO SLAP YOUR SELF IN THE NUTS! :P";
+		$this->serve["triggers"]["bar"] 	= "This Bar have: !coffee !bang !cola !beer !joint !head !mix !whisky !pipe !pussy !coke !icecream";
+		$this->serve["triggers"]["coke"] 	= "Are you stupid? We doesn't do shit like this... GO SLAP YOUR SELF IN THE NUTS! :P";
 		
-		$this->serve["triggers"]["coffee"]  = "Making a cup of coffee for [nick], [today] made today of [total] ordered wich make it the [sumtotal] time i make coffee";
+		$this->serve["triggers"]["coffee"]  	= "Making a cup of coffee for [nick], [today] made today of [total] ordered wich make it the [sumtotal] time i make coffee";
 
 		$this->serve["triggers"]["bang"][] 	= "fills a bang from stash and serves it to [nick] ([today]/[total]/[sumtotal])";
+
 		$this->serve["triggers"]["cola"][] 	= "Serves icecold cola ([today]/[total]/[sumtotal])";
-        $this->serve["triggers"]["cola"][] 	= "Serves cola that been laying in pile of shit ~45c ([today]/[total]/[sumtotal])";
-        $this->serve["triggers"]["cola"][] 	= "Serves cola been standing close to box of dryice ~1,3c ([today]/[total]/[sumtotal])";
+        	$this->serve["triggers"]["cola"][] 	= "Serves cola that been laying in pile of shit ~45c ([today]/[total]/[sumtotal])";
+        	$this->serve["triggers"]["cola"][] 	= "Serves cola been standing close to box of dryice ~1,3c ([today]/[total]/[sumtotal])";
 		$this->serve["triggers"]["cola"][] 	= "Serves cola that been standing next to comp for few hrs ([today]/[total]/[sumtotal])";
+
 		$this->serve["triggers"]["beer"][] 	= "Serves icecold beer ([today]/[total]/[sumtotal])";
-		$this->serve["triggers"]["joint"][] = "Grabs a joint to [nick] from the stash ([today]/[total]/[sumtotal])";
+
+		$this->serve["triggers"]["joint"][] 	= "Grabs a joint to [nick] from the stash ([today]/[total]/[sumtotal])";
 
 		$this->serve["triggers"]["head"][] 	= ".h.e.a.d. ([total])";
 		$this->serve["triggers"]["head"][] 	= "head for you sir. ([total])";
 		
-        $this->serve["triggers"]["wine"][] 	= "pours up some fine stuff from the basement ([total])";
-        $this->serve["triggers"]["wine"][] 	= "here you are, found something out back ([total])";		
-        $this->serve["triggers"]["wine"][] 	= "lucky you we just got one of this left enjoy ([total])";
+		$this->serve["triggers"]["horny"][] 	= "sends some horny lemmings in [nick]s direction ([today]/[total])";
+		$this->serve["triggers"]["horny"][] 	= "grabs the next best bitch from stack and hands it over to [nick] ([today]/[total])";
+		
+		$this->serve["triggers"]["car"][] 	= "today is car give-away day! here is yours, [nick] ([total])";
+		$this->serve["triggers"]["car"][] 	= "that is the last ford maverick I could find. now take it and stfu... ([total])";
+		
+		$this->serve["triggers"]["site"][] 	= "ATTENTION, ATTENTION! [nick] wants access to a site. What do we say to such people? STFU & GTFO! KTHXBYE! ([total])";
+		$this->serve["triggers"]["dump"][] 	= "[nick] wants to take a dump. but we do not tolerate such nasty things in our channel... ([total])";
+		$this->serve["triggers"]["free"][] 	= "the only thing that is free is death and even that costs ones life... ([total])";
+		$this->serve["triggers"]["request"][] 	= "Got a request? Huh? Request for what? We aint takin no requests today... ([total])";
+		
+        	$this->serve["triggers"]["wine"][] 	= "pours up some fine stuff from the basement ([total])";
+		$this->serve["triggers"]["wine"][] 	= "here you are, found something out back ([total])";		
+        	$this->serve["triggers"]["wine"][] 	= "lucky you we just got one of this left enjoy ([total])";
 		$this->serve["triggers"]["wine"][] 	= "so youre hit hard, where you want it ?, dont cry";
 		
 		$this->serve["triggers"]["mix"][] 	= "grinding up some weed for a mix ([total])";
@@ -46,20 +59,20 @@ class serve_mod extends module {
 		$this->serve["triggers"]["mix"][] 	= "goes strain hunting in morocco for some good shit for your mix ([total])";
 
 		$this->serve["triggers"]["pipe"][] 	= "goes strain hunting in morocco for some good shit for your pipe ([total])";
-        $this->serve["triggers"]["pipe"][] 	= "saw some shit in corner, fills a pipe ([total])";
-        $this->serve["triggers"]["pipe"][] 	= "skunky just arrieved peace all over ([total])";
+        	$this->serve["triggers"]["pipe"][] 	= "saw some shit in corner, fills a pipe ([total])";
+        	$this->serve["triggers"]["pipe"][] 	= "skunky just arrieved peace all over ([total])";
         
-        $this->serve["triggers"]["whiskey"][] 	= "serves whiskey on the rocks ([total])";
-        $this->serve["triggers"]["whiskey"][] 	= "found some weird looking bottle in corner, might hit gold cheers ([total])";
-        $this->serve["triggers"]["whiskey"][] 	= "cola and bad whiskey for you ([total])";
+        	$this->serve["triggers"]["whiskey"][] 	= "serves whiskey on the rocks ([total])";
+        	$this->serve["triggers"]["whiskey"][] 	= "found some weird looking bottle in corner, might hit gold cheers ([total])";
+        	$this->serve["triggers"]["whiskey"][] 	= "cola and bad whiskey for you ([total])";
         
 		$this->serve["triggers"]["pussy"][]	= "slaps [nick] in face with a smelly pussy ([total])";
-		$this->serve["triggers"]["pussy"][] = "Sends some pussy [nick]`s way .. ([total])";
-		$this->serve["triggers"]["pussy"][] = "not enough money to suply you aswell ... ([total])";
+		$this->serve["triggers"]["pussy"][] 	= "Sends some pussy [nick]`s way .. ([total])";
+		$this->serve["triggers"]["pussy"][] 	= "not enough money to suply you aswell ... ([total])";
 
-    	$this->serve["triggers"]["icecream"][] 	= "here [nick]... one ball for you only ([today]/[total]/[sumtotal])";
-        $this->serve["triggers"]["icecream"][] 	= "finds a biig icecream for [nick] eat and you get for free (50$ to use toilet) ([today]/[total]/[sumtotal])";
-        $this->serve["triggers"]["icecream"][] 	= "dusts off something that look like icecream from the corner of fridge, here [nick] ([today]/[total]/[sumtotal])";
+    		$this->serve["triggers"]["icecream"][] 	= "here [nick]... one ball for you only ([today]/[total]/[sumtotal])";
+        	$this->serve["triggers"]["icecream"][] 	= "finds a biig icecream for [nick] eat and you get for free (50$ to use toilet) ([today]/[total]/[sumtotal])";
+        	$this->serve["triggers"]["icecream"][] 	= "dusts off something that look like icecream from the corner of fridge, here [nick] ([today]/[total]/[sumtotal])";
 		// - docu:
 		// [nick] = nick that triggered, [today] how many heads/coffee person had today
 		// [total] = how many nick had it total, [last] time of last, [since] time since last

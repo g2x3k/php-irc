@@ -898,7 +898,7 @@ class parser
 
     }
 
-    function dccParse($line, $vars, $txt)
+    function dccParse($line, $vars, $query)
     {
         $cVars = count($vars);
 
